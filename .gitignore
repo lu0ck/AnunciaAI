@@ -1,0 +1,17 @@
+# AnunciaAI — NÃO versionar chaves/keystore
+local.properties
+anunciaai.keystore
+*.apk
+.gradle-home/
+app/build/
+build/
+
+# toolchain local (750MB fora do git)
+android-sdk/
+gradle-8.10.2/
+jdk-17*/
+tools/
+.gradle/
+.gradle-home/
+
+.DS_Store
