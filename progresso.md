@@ -103,6 +103,7 @@ GRADLE_USER_HOME=$PWD/.gradle-home ANDROID_HOME=$PWD/android-sdk JAVA_HOME=$PWD/
 ```
 
 ## Planejado (próximos passos, precisa do celular/chaves)
+- [ ] **APK 2.0 NÃO TEM CHAVE DE IA (achado 28/09, verificado no dex: 0 ocorrências de `nvapi-`/`AIza`/`DASHSCOPE`)** — `local.properties` está com todas as chaves comentadas (mtime 27/09 14:59). Sem chave, `FabricaIA.criar()` → null e a revisão cai em preenchimento manual. **Antes de testar a IA: descomentar/preencher `ANUNCIAAI_NVIDIA_KEY` e rebuildar (BUILD 18).**
 - [ ] Instalar `anunciaai-v2-release.apk` no celular (substitui a v1 — mesma assinatura) e testar o fluxo completo
 - [ ] Teste real: IA multi-fotos (NVIDIA ok), ML OAuth (precisa app no DevCenter), OLX WebView
 - [ ] Teste real das Mensagens ML (precisa OAuth + anúncio com perguntas)
