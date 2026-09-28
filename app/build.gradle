@@ -14,8 +14,8 @@ android {
         applicationId "br.com.anunciaai"
         minSdk 26
         targetSdk 35
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "2.0"
 
         // Chaves OAuth/IA: lidas do local.properties (não versionado), vazias por padrão.
         // Preencha: ANUNCIAAI_ML_CLIENT_ID / ANUNCIAAI_ML_CLIENT_SECRET /
@@ -37,11 +37,19 @@ android {
 
     signingConfigs {
         release {
-            if (file('../anunciaai.keystore').exists()) {
-                storeFile file('../anunciaai.keystore')
-                storePassword System.getenv('ANUNCIAAI_KS_PASS') ?: ''
-                keyAlias 'anunciaai'
-                keyPassword System.getenv('ANUNCIAAI_KEY_PASS') ?: ''
+            // Credenciais locais: keystore.properties (gitignored) ou variáveis de ambiente.
+            // Nada de senha hardcoded no código (repo é pública).
+            def ksProps = new Properties()
+            def ksFile = rootProject.file('keystore.properties')
+            if (ksFile.exists()) {
+                ksFile.withInputStream { ksProps.load(it) }
+            }
+            def arquivoKs = ksProps.getProperty('storeFile') ?: '../anunciaai.keystore'
+            if (file(arquivoKs).exists() || rootProject.file(arquivoKs).exists()) {
+                storeFile rootProject.file(arquivoKs)
+                storePassword ksProps.getProperty('storePassword') ?: System.getenv('ANUNCIAAI_KS_PASS')
+                keyAlias ksProps.getProperty('keyAlias') ?: 'anunciaai'
+                keyPassword ksProps.getProperty('keyPassword') ?: System.getenv('ANUNCIAAI_KEY_PASS')
             }
         }
     }
@@ -51,9 +59,7 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            if (file('../anunciaai.keystore').exists()) {
-                signingConfig signingConfigs.release
-            }
+            signingConfig signingConfigs.release
         }
     }
 

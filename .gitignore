@@ -1,5 +1,6 @@
 # AnunciaAI — NÃO versionar chaves/keystore
 local.properties
+keystore.properties
 anunciaai.keystore
 *.apk
 .gradle-home/

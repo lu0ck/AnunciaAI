@@ -6,12 +6,13 @@ App Android de crosslisting: você tira uma foto do produto, a IA (Qwen-VL Plus)
 
 ## Instalar no celular (sideload, sem Play Store)
 
-1. Copie `anunciaai-v1-release.apk` para o celular (WhatsApp, cabo USB, Drive...)
+1. Copie **`AnunciaAI-2.0.apk`** para o celular (WhatsApp, cabo USB, Drive...)
 2. Toque no arquivo → permita "instalar app desconhecido"
-3. Abra o AnunciaAI
+3. Abra o AnunciaAI — o ícone é uma **etiqueta branca em fundo verde**, e em Ajustes → Apps aparece a versão **2.0**
 
-> O release já está assinado (`anunciaai.keystore`, alias `anunciaai`). A senha da keystore fica no ambiente (ANUNCIAAI_KS_PASS) ou com você — nunca commitada.
-> Se reinstalar por cima depois de atualizar o código, use o MESMO keystore, senão o Android exige desinstalar antes.
+> Se tiver uma versão antiga instalada, pode instalar por cima (mesma assinatura) — o Android vai atualizar porque a versão nova é 2.0 (versionCode 2).
+> Se aparecer "app não instalado", desinstale a antiga e instale esta de novo.
+> A senha da keystore fica no `keystore.properties` (local, fora do git) — nunca é commitada.
 
 ## Build (comandos exatos)
 
