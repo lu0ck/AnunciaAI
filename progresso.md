@@ -2,6 +2,8 @@
 
 > App Android de crosslisting: foto → IA (Qwen-VL Plus) → revisão → publicar em Mercado Livre / eBay / Shopee / OLX / Facebook Marketplace / Enjoei.
 > **Continuação:** novo chat com o nome "AnunciaAI" → dizer "continuar do progresso.md". Espec completa original: `~/.config/Hermes/composer-pastes/pasted_content_2026-09-26_19-00-46-478_e2a84b.txt`
+>
+> ⚠️ **ESTADO DO CHAT (medido no state.db em 28/09): 894 KB — 235% do limite de 380 KB.** 562 mensagens, 338 tool calls, 201 chamadas de API, 26,8M tokens de entrada acumulados. Pela convenção: **começar chat NOVO para o próximo trabalho**; este arquivo tem tudo que o novo chat precisa.
 
 ## ⚠️ Convenção do chat (definida por Lucas em 26/09/2026)
 1. Limite do chat: **380 KB**. Avisar o usuário quando estiver chegando perto.
