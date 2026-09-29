@@ -30,7 +30,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.*
 import br.com.anunciaai.AnunciaAIApp
-import br.com.anunciaai.ui.BottomDockCurvo
+import br.com.anunciaai.ui.BarraDockNova
 import br.com.anunciaai.ui.IconePlataforma
 import br.com.anunciaai.ui.Plataforma
 import br.com.anunciaai.ui.Rotas
@@ -110,24 +110,24 @@ fun ListaItensScreen(
                 }
             )
         },
-        bottomBar = { BottomDockCurvo(Rotas.LISTA, onNavBottom) },
+        bottomBar = { BarraDockNova(Rotas.LISTA, onNavBottom) },
+        // v6.1: FAB "Vender" CENTRAL ancorado pelo Scaffold sobre o vão do dock.
+        // (O FAB antigo do canto foi removido — PASSO 1.)
         floatingActionButton = {
-            // v5.4: FAB com spring — cresce suave ao entrar na tela
-            val escala by animateFloatAsState(
-                targetValue = 1f,
-                animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium),
-                label = "fab"
-            )
             FloatingActionButton(
                 onClick = onNovoItem,
                 containerColor = Destaque,
                 contentColor = Color(0xFF06231B),
-                modifier = Modifier.scale(escala)
+                shape = androidx.compose.foundation.shape.CircleShape,
+                modifier = Modifier.size(58.dp)
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Novo item")
+                Icon(
+                    androidx.compose.material.icons.Icons.Default.Add,
+                    contentDescription = "Vender"
+                )
             }
         },
-        floatingActionButtonPosition = FabPosition.End
+        floatingActionButtonPosition = FabPosition.Center
     ) { pad ->
         LazyColumn(
             Modifier.padding(pad).fillMaxSize(),

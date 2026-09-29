@@ -70,6 +70,13 @@ Kotlin + Jetpack Compose · Room · Retrofit/OkHttp · WebView (`evaluateJavascr
 - (nada — todos os builds passaram)
 
 ## Feito (adicional, depois do build 1)
+- [x] 29/09 — **v6.1 (BUILD 29) — CORREÇÃO DO CRASH v6.0 + estabilidade:**
+  - **CAUSA DO CRASH**: o dock custom da v6.0 usava Canvas/Path/arcTo manual dentro de Box com FAB posicionado à mão — sobreposição quebrada no Início (2 FABs) e geometria frágil. REMOVIDO por completo.
+  - **PASSO 1**: FAB antigo do canto inferior direito REMOVIDO do Início (era duplicado com o central — erro meu da v6.0). Único FAB do app = "Vender" central.
+  - **PASSO 2**: `BarraDockNova` com **BottomAppBar OFICIAL do Material 3** — 4 itens com weight + `Spacer(weight 1f)` central abrindo o vão; FAB 58dp verde ancorado pelo **Scaffold com FabPosition.Center** em cada tela (Início/Vitrine/Mensagens/Perfil), sobrepondo o vão com o recorte nativo do M3. Animações mantidas: escala spring 1.0→1.15 + cor 300ms.
+  - **PASSO 3**: aba ativa em `rememberSaveable` sincronizada com a rota via LaunchedEffect — rota continua sendo a fonte da verdade; sem recomposição infinita.
+  - Labels "Vitrine" agora com espaço real (weight 1f cada lado; não espreme mais).
+  - **Verificado**: versionCode 14 / v6.1; NavigationBar ausente; BottomAppBar confirmado no mapping.txt do R8; nvapi- OK; assinatura 5bb25361. APK: AnunciaAI-6.1.apk.
 - [x] 29/09 — **v6.0 PONTO 1 (BUILD 28) — Custom Bottom Dock com FAB central (NavigationBar padrão EXTINTA):**
   - Novo componente **BottomDockCurvo**: barra desenhada com **Path custom em Canvas** — retângulo com vão semicircular central (arcTo, curvas cúbicas de entrada/saída) que acomoda o **FAB "Vender" 64dp verde-menta flutuando sobreposto** no centro.
   - Itens (esq→dir): **Início | Vitrine | [vão/FAB] | Mensagens | Perfil** — exatamente a spec.

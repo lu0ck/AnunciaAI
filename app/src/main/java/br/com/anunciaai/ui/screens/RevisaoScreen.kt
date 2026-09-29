@@ -33,7 +33,7 @@ import br.com.anunciaai.ia.modelo.SugestaoIA
 import br.com.anunciaai.plataformas.webview.LoginWebViewActivity
 import br.com.anunciaai.publica.OrquestradorDePublicacao
 import br.com.anunciaai.publica.webview.SessaoPublicacaoWeb
-import br.com.anunciaai.ui.BottomDockCurvo
+import br.com.anunciaai.ui.BarraDockNova
 import br.com.anunciaai.ui.Plataforma
 import br.com.anunciaai.ui.Rotas
 import br.com.anunciaai.ui.foto.CarrosselFotos
@@ -194,7 +194,7 @@ fun RevisaoScreen(
                 }
             )
         },
-        bottomBar = { BottomDockCurvo(Rotas.CAPTURA, onNavBottom) }
+        bottomBar = { BarraDockNova(Rotas.CAPTURA, onNavBottom) }
     ) { pad ->
         Column(
             Modifier.padding(pad).fillMaxSize().verticalScroll(rememberScrollState())

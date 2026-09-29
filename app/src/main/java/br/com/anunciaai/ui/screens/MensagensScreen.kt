@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.Chat
 import androidx.compose.material.icons.outlined.Mail
 import androidx.compose.material3.*
@@ -20,7 +21,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import br.com.anunciaai.AnunciaAIApp
 import br.com.anunciaai.publica.mercadolivre.MercadoLivreApi
-import br.com.anunciaai.ui.BottomDockCurvo
+import br.com.anunciaai.ui.BarraDockNova
 import br.com.anunciaai.ui.EstadoVazio
 import br.com.anunciaai.ui.IconePlataforma
 import br.com.anunciaai.ui.Plataforma
@@ -124,7 +125,22 @@ fun MensagensScreen(onNavBottom: (String) -> Unit = {}) {
 
     Scaffold(
         topBar = { TopAppBar(title = { Text("Mensagens") }) },
-        bottomBar = { BottomDockCurvo(Rotas.MENSAGENS, onNavBottom) }
+        bottomBar = { BarraDockNova(Rotas.MENSAGENS, onNavBottom) },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { onNavBottom(Rotas.CAPTURA) },
+                containerColor = Destaque,
+                contentColor = androidx.compose.ui.graphics.Color(0xFF06231B),
+                shape = androidx.compose.foundation.shape.CircleShape,
+                modifier = Modifier.size(58.dp)
+            ) {
+                Icon(
+                    androidx.compose.material.icons.Icons.Default.Add,
+                    contentDescription = "Vender"
+                )
+            }
+        },
+        floatingActionButtonPosition = FabPosition.Center
     ) { pad ->
         Column(Modifier.padding(pad).fillMaxSize()) {
             // ── Pills de filtro (ITEM 2) ──

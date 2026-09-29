@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -15,7 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import br.com.anunciaai.AnunciaAIApp
 import br.com.anunciaai.ia.FabricaIA
-import br.com.anunciaai.ui.BottomDockCurvo
+import br.com.anunciaai.ui.BarraDockNova
 import br.com.anunciaai.ui.Rotas
 import br.com.anunciaai.ui.theme.CorSuperficie
 import br.com.anunciaai.ui.theme.Destaque
@@ -32,7 +33,22 @@ fun PerfilScreen(onNavBottom: (String) -> Unit = {}) {
 
     Scaffold(
         topBar = { TopAppBar(title = { Text("Perfil") }) },
-        bottomBar = { BottomDockCurvo(Rotas.PERFIL, onNavBottom) }
+        bottomBar = { BarraDockNova(Rotas.PERFIL, onNavBottom) },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { onNavBottom(Rotas.CAPTURA) },
+                containerColor = Destaque,
+                contentColor = androidx.compose.ui.graphics.Color(0xFF06231B),
+                shape = androidx.compose.foundation.shape.CircleShape,
+                modifier = Modifier.size(58.dp)
+            ) {
+                Icon(
+                    androidx.compose.material.icons.Icons.Default.Add,
+                    contentDescription = "Vender"
+                )
+            }
+        },
+        floatingActionButtonPosition = FabPosition.Center
     ) { pad ->
         Column(
             Modifier

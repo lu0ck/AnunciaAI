@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.PhotoCamera
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -18,11 +19,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import br.com.anunciaai.AnunciaAIApp
-import br.com.anunciaai.ui.BottomDockCurvo
+import br.com.anunciaai.ui.BarraDockNova
 import br.com.anunciaai.ui.EstadoVazio
 import br.com.anunciaai.ui.IconePlataforma
 import br.com.anunciaai.ui.Rotas
 import br.com.anunciaai.ui.foto.FotoPrimeira
+import br.com.anunciaai.ui.theme.Destaque
 
 /**
  * Vitrine (v6): grid 2 colunas de TODOS os itens — a "loja" completa.
@@ -41,7 +43,22 @@ fun VitrineScreen(
 
     Scaffold(
         topBar = { TopAppBar(title = { Text("Vitrine") }) },
-        bottomBar = { BottomDockCurvo(Rotas.VITRINE, onNavBottom) }
+        bottomBar = { BarraDockNova(Rotas.VITRINE, onNavBottom) },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = onNovoItem,
+                containerColor = Destaque,
+                contentColor = androidx.compose.ui.graphics.Color(0xFF06231B),
+                shape = androidx.compose.foundation.shape.CircleShape,
+                modifier = Modifier.size(58.dp)
+            ) {
+                Icon(
+                    androidx.compose.material.icons.Icons.Default.Add,
+                    contentDescription = "Vender"
+                )
+            }
+        },
+        floatingActionButtonPosition = FabPosition.Center
     ) { pad ->
         if (itens.isEmpty()) {
             Box(Modifier.padding(pad).fillMaxSize(), contentAlignment = Alignment.Center) {
