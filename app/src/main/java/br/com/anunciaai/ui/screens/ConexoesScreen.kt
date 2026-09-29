@@ -33,7 +33,7 @@ import kotlinx.coroutines.launch
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ConexoesScreen() {
+fun ConexoesScreen(embutida: Boolean = false) {
     val contexto = LocalContext.current
     val app = contexto.applicationContext as AnunciaAIApp
     val escopo = rememberCoroutineScope()
@@ -43,9 +43,9 @@ fun ConexoesScreen() {
     val conectadas = contas.map { it.plataforma }.toSet()
     var menuPlat by remember { mutableStateOf<String?>(null) }
 
-    Scaffold(topBar = { TopAppBar(title = { Text("Conexões") }) }) { pad ->
+    val conteudo: @Composable () -> Unit = {
         Column(
-            Modifier.padding(pad).padding(horizontal = 16.dp).verticalScroll(rememberScrollState())
+            Modifier.padding(horizontal = 16.dp).verticalScroll(rememberScrollState())
         ) {
             msg?.let {
                 Text(
@@ -205,6 +205,14 @@ fun ConexoesScreen() {
             }
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             Spacer(Modifier.height(24.dp))
+        }
+    }
+
+    if (embutida) {
+        conteudo()
+    } else {
+        Scaffold(topBar = { TopAppBar(title = { Text("Conexões") }) }) { pad ->
+            Box(Modifier.padding(pad)) { conteudo() }
         }
     }
 }

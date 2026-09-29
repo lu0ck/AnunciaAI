@@ -20,7 +20,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import br.com.anunciaai.AnunciaAIApp
 import br.com.anunciaai.publica.mercadolivre.MercadoLivreApi
-import br.com.anunciaai.ui.BarraInferior
+import br.com.anunciaai.ui.BottomDockCurvo
 import br.com.anunciaai.ui.EstadoVazio
 import br.com.anunciaai.ui.IconePlataforma
 import br.com.anunciaai.ui.Plataforma
@@ -124,7 +124,7 @@ fun MensagensScreen(onNavBottom: (String) -> Unit = {}) {
 
     Scaffold(
         topBar = { TopAppBar(title = { Text("Mensagens") }) },
-        bottomBar = { BarraInferior(Rotas.MENSAGENS, onNavBottom) }
+        bottomBar = { BottomDockCurvo(Rotas.MENSAGENS, onNavBottom) }
     ) { pad ->
         Column(Modifier.padding(pad).fillMaxSize()) {
             // ── Pills de filtro (ITEM 2) ──
@@ -178,7 +178,7 @@ fun MensagensScreen(onNavBottom: (String) -> Unit = {}) {
                         titulo = "Nada por aqui ainda",
                         subtitulo = "Quando os compradores mandarem mensagens ou perguntas, elas aparecem aqui.",
                         textoBotao = "Conectar plataformas",
-                        onBotao = { onNavBottom(Rotas.CONEXOES) },
+                        onBotao = { onNavBottom(Rotas.PERFIL) },
                         modifier = Modifier
                     )
                 }

@@ -13,18 +13,20 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.core.tween
 import br.com.anunciaai.ui.screens.AnaliseScreen
-import br.com.anunciaai.ui.screens.ConexoesScreen
 import br.com.anunciaai.ui.screens.DetalheItemScreen
 import br.com.anunciaai.ui.screens.ListaItensScreen
 import br.com.anunciaai.ui.screens.MensagensScreen
 import br.com.anunciaai.ui.screens.NovaCapturaScreen
+import br.com.anunciaai.ui.screens.PerfilScreen
 import br.com.anunciaai.ui.screens.RevisaoScreen
 import br.com.anunciaai.ui.screens.StatusScreen
+import br.com.anunciaai.ui.screens.VitrineScreen
 
 object Rotas {
     const val LISTA = "lista"
     const val CAPTURA = "captura"
-    const val CONEXOES = "conexoes"
+    const val VITRINE = "vitrine"
+    const val PERFIL = "perfil"
     const val MENSAGENS = "mensagens"
     const val ANALISE = "analise/{itemId}"
     const val REVISAO = "revisao/{itemId}"
@@ -69,8 +71,15 @@ fun AnunciaAINavGraph() {
                 onNavBottom = navBottom
             )
         }
-        composable(Rotas.CONEXOES) {
-            ConexoesScreen()
+        composable(Rotas.VITRINE) {
+            VitrineScreen(
+                onAbrirItem = { nav.navigate(Rotas.detalhe(it)) },
+                onNovoItem = { nav.navigate(Rotas.CAPTURA) },
+                onNavBottom = navBottom
+            )
+        }
+        composable(Rotas.PERFIL) {
+            PerfilScreen(onNavBottom = navBottom)
         }
         composable(Rotas.MENSAGENS) {
             MensagensScreen(onNavBottom = navBottom)

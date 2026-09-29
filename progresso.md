@@ -70,6 +70,13 @@ Kotlin + Jetpack Compose · Room · Retrofit/OkHttp · WebView (`evaluateJavascr
 - (nada — todos os builds passaram)
 
 ## Feito (adicional, depois do build 1)
+- [x] 29/09 — **v6.0 PONTO 1 (BUILD 28) — Custom Bottom Dock com FAB central (NavigationBar padrão EXTINTA):**
+  - Novo componente **BottomDockCurvo**: barra desenhada com **Path custom em Canvas** — retângulo com vão semicircular central (arcTo, curvas cúbicas de entrada/saída) que acomoda o **FAB "Vender" 64dp verde-menta flutuando sobreposto** no centro.
+  - Itens (esq→dir): **Início | Vitrine | [vão/FAB] | Mensagens | Perfil** — exatamente a spec.
+  - Animações: **escala do ícone ativo 1.0→1.15 com spring bouncy** (animateFloatAsState), **cor animada 300ms** cinza→verde-menta (animateColorAsState), transições de tela fade+slide já ativas do NavHost.
+  - **Telas novas**: VitrineScreen (grid 2 colunas do catálogo inteiro, com selos sobre a foto) e PerfilScreen (IA ativa + Conexões absorvidas da antiga aba — ConexoesScreen virou `embutida=true`).
+  - BarraInferior.kt **deletada**; rotas: CONEXOES removida, VITRINE/PERFIL adicionadas; empty state Mensagens aponta pro Perfil.
+  - **Verificado no binário**: versionCode 13 / v6.0; `androidx/compose/material3/NavigationBar` AUSENTE do dex (regra de ouro cumprida); strings Vitrine/Perfil/Vender OK; nvapi- OK; assinatura 5bb25361.
 - [x] 29/09 — **v5.4 (BUILD 27) — micro-interações premium + interface de credenciais ML:**
   - **Transições de tela** no NavHost: fade+slide horizontal sutil (enter 220ms, exit 180ms, pop reverso).
   - **Count-up animado** do "Valor em estoque": 0 → valor real com spring (DampingRatioLowBouncy/StiffnessLow).

@@ -13,7 +13,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import br.com.anunciaai.AnunciaAIApp
-import br.com.anunciaai.ui.BarraInferior
 import br.com.anunciaai.ui.IconePlataforma
 import br.com.anunciaai.ui.Plataforma
 import br.com.anunciaai.ui.Rotas

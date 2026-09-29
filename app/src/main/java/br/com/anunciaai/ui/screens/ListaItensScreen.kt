@@ -30,7 +30,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.*
 import br.com.anunciaai.AnunciaAIApp
-import br.com.anunciaai.ui.BarraInferior
+import br.com.anunciaai.ui.BottomDockCurvo
 import br.com.anunciaai.ui.IconePlataforma
 import br.com.anunciaai.ui.Plataforma
 import br.com.anunciaai.ui.Rotas
@@ -110,7 +110,7 @@ fun ListaItensScreen(
                 }
             )
         },
-        bottomBar = { BarraInferior(Rotas.LISTA, onNavBottom) },
+        bottomBar = { BottomDockCurvo(Rotas.LISTA, onNavBottom) },
         floatingActionButton = {
             // v5.4: FAB com spring — cresce suave ao entrar na tela
             val escala by animateFloatAsState(
