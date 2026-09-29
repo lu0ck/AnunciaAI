@@ -1,10 +1,10 @@
 package br.com.anunciaai.ui.screens
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -14,9 +14,10 @@ import androidx.compose.ui.unit.dp
 import br.com.anunciaai.AnunciaAIApp
 import br.com.anunciaai.publica.webview.SessaoPublicacaoWeb
 import br.com.anunciaai.ui.BarraInferior
+import br.com.anunciaai.ui.IconePlataforma
 import br.com.anunciaai.ui.Plataforma
 import br.com.anunciaai.ui.Rotas
-import br.com.anunciaai.ui.theme.CorPlataforma
+import br.com.anunciaai.ui.theme.Destaque
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,7 +35,11 @@ fun StatusScreen(
         topBar = {
             TopAppBar(
                 title = { Text("Status") },
-                navigationIcon = { TextButton(onClick = onVoltar) { Text("←") } }
+                navigationIcon = {
+                    IconButton(onClick = onVoltar) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Voltar")
+                    }
+                }
             )
         },
         bottomBar = { BarraInferior(Rotas.LISTA, onNavBottom) }
@@ -48,7 +53,7 @@ fun StatusScreen(
                         append(if (r.ok) "Publicado" else "erro")
                     },
                     style = MaterialTheme.typography.titleMedium,
-                    color = if (r.ok) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                    color = if (r.ok) Destaque else MaterialTheme.colorScheme.error
                 )
                 if (r.msg.isNotBlank() && !r.ok) {
                     Text(r.msg, style = MaterialTheme.typography.bodySmall,
@@ -57,7 +62,7 @@ fun StatusScreen(
                 Spacer(Modifier.height(16.dp))
             }
 
-            Text("Resultado por plataforma", style = MaterialTheme.typography.titleSmall)
+            Text("Resultado por plataforma", style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(10.dp))
 
             if (pubs.isEmpty()) {
@@ -66,20 +71,28 @@ fun StatusScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             } else {
-                LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(0.dp)) {
                     items(pubs, key = { it.id }) { pub ->
-                        val (cor, estado) = quando(pub.status)
+                        val estado = when (pub.status) {
+                            "PUBLICADO" -> "Publicado"
+                            "VENDIDO" -> "Vendido"
+                            "ENCERRADO" -> "Encerrado"
+                            "ERRO" -> "Erro"
+                            else -> "pendente"
+                        }
                         Row(
-                            Modifier.fillMaxWidth(),
+                            Modifier.fillMaxWidth().padding(vertical = 10.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // indicador inline: ponto colorido + texto
-                            Box(Modifier.size(10.dp).background(cor, CircleShape))
-                            Spacer(Modifier.width(10.dp))
+                            IconePlataforma(pub.plataforma, conectada = pub.status == "PUBLICADO", tamanho = 32.dp)
+                            Spacer(Modifier.width(12.dp))
                             Column(Modifier.weight(1f)) {
                                 Text(
                                     "${Plataforma.doNome(pub.plataforma)?.rotulo ?: pub.plataforma} — $estado",
-                                    style = MaterialTheme.typography.bodyLarge
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = if (pub.status == "PUBLICADO") Destaque
+                                    else if (pub.status == "ERRO") MaterialTheme.colorScheme.error
+                                    else MaterialTheme.colorScheme.onSurface
                                 )
                                 pub.urlAnuncio?.let {
                                     Text(it, style = MaterialTheme.typography.bodySmall,
@@ -91,23 +104,13 @@ fun StatusScreen(
                                 }
                             }
                         }
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                     }
                 }
             }
 
             Spacer(Modifier.height(16.dp))
-            OutlinedButton(onClick = onVerDetalhe, Modifier.fillMaxWidth()) {
-                Text("Ver detalhe")
-            }
+            TextButton(onClick = onVerDetalhe) { Text("Ver detalhe", color = Destaque) }
         }
     }
 }
-
-fun quando(status: String): Pair<androidx.compose.ui.graphics.Color, String> =
-    when (status) {
-        "PUBLICADO" -> androidx.compose.ui.graphics.Color(0xFF1F7A5C) to "Publicado"
-        "VENDIDO" -> androidx.compose.ui.graphics.Color(0xFFD9A441) to "Vendido"
-        "ENCERRADO" -> androidx.compose.ui.graphics.Color(0xFF8A8A8A) to "Encerrado"
-        "ERRO" -> androidx.compose.ui.graphics.Color(0xFFB33A3A) to "Erro"
-        else -> androidx.compose.ui.graphics.Color(0xFF8A8A8A) to "pendente"
-    }

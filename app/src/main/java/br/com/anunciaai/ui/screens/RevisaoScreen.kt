@@ -37,7 +37,7 @@ import br.com.anunciaai.ui.Plataforma
 import br.com.anunciaai.ui.Rotas
 import br.com.anunciaai.ui.foto.CarrosselFotos
 import br.com.anunciaai.ui.foto.FotoUtil
-import br.com.anunciaai.ui.theme.CorPlataforma
+import br.com.anunciaai.ui.theme.Destaque
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -286,15 +286,20 @@ fun RevisaoScreen(
                         label = { Text("marcas de uso") }
                     )
                 }
-                // Ação principal: gerar com IA (botão tonal, não TextButton esquecido)
-                OutlinedButton(
+                // Ação principal: sólida, cor de destaque única
+                Button(
                     onClick = { gerarComIA() },
                     enabled = !gerando && fotos.isNotEmpty(),
-                    modifier = Modifier.fillMaxWidth().height(48.dp),
-                    shape = RoundedCornerShape(14.dp)
+                    modifier = Modifier.fillMaxWidth().height(52.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Destaque,
+                        contentColor = androidx.compose.ui.graphics.Color(0xFF06231B)
+                    )
                 ) {
                     if (gerando) {
-                        CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                        CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp,
+                            color = androidx.compose.ui.graphics.Color(0xFF06231B))
                         Spacer(Modifier.width(10.dp))
                         Text("Gerando anúncio...", style = MaterialTheme.typography.titleMedium)
                     } else {
@@ -305,13 +310,9 @@ fun RevisaoScreen(
                 }
 
                 Spacer(Modifier.height(12.dp))
-                HorizontalDivider(color = MaterialTheme.colorScheme.outline)
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 Spacer(Modifier.height(12.dp))
-                Text(
-                    "Onde publicar",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
+                Text("Onde publicar", style = MaterialTheme.typography.titleMedium)
 
                 Spacer(Modifier.height(10.dp))
                 FlowRow(
@@ -319,30 +320,15 @@ fun RevisaoScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Plataforma.entries.forEach { plat ->
-                        val conectada = if (plat.precisaOAuth) conectadas.contains(plat.name) else true
                         val marcada = marcadas.contains(plat)
+                        // Chip limpo: sem dot decorativo — o estado é o chip selecionado
                         FilterChip(
                             selected = marcada,
                             onClick = {
                                 marcadas = if (marcada) marcadas - plat else marcadas + plat
                             },
-                            shape = CircleShape,
-                            leadingIcon = {
-                                Box(
-                                    Modifier
-                                        .padding(start = 8.dp)
-                                        .size(10.dp)
-                                        .background(
-                                            CorPlataforma[plat.name] ?: MaterialTheme.colorScheme.primary,
-                                            CircleShape
-                                        )
-                                )
-                            },
                             label = { Text(plat.rotulo) }
                         )
-                        if (!conectada) {
-                            // chip desabilitado visualmente pela ausência de conexão
-                        }
                     }
                 }
                 val naoConectadas = Plataforma.entries
@@ -366,9 +352,14 @@ fun RevisaoScreen(
                     onClick = { publicar() },
                     enabled = !publicando && !gerando,
                     modifier = Modifier.fillMaxWidth().height(54.dp),
-                    shape = MaterialTheme.shapes.medium
+                    shape = MaterialTheme.shapes.medium,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Destaque,
+                        contentColor = androidx.compose.ui.graphics.Color(0xFF06231B)
+                    )
                 ) {
-                    Text(if (publicando) "Publicando..." else "Publicar")
+                    Text(if (publicando) "Publicando..." else "Publicar",
+                        style = MaterialTheme.typography.titleMedium)
                 }
                 Spacer(Modifier.height(28.dp))
             }

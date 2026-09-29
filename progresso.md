@@ -70,6 +70,18 @@ Kotlin + Jetpack Compose · Room · Retrofit/OkHttp · WebView (`evaluateJavascr
 - (nada — todos os builds passaram)
 
 ## Feito (adicional, depois do build 1)
+- [x] 29/09 — **v3.0 REDESIGN COMPLETO (BUILD 20) — sistema de design novo, saiu do Material genérico:**
+  - **Tema**: fundo #12151A, superfície única #1B1F26 (um tom acima), UMA cor de destaque #00C896 (verde-menta) em CTA/aba ativa/status positivo, texto #F2F2F0/#8B909A, neutro #4B505B, erro #FF5470. Mostarda #D9A441 REMOVIDA (verificado no dex: sumiu). Tipografia: Manrope 28/800 (título), 16/600 (linha), 14/400 (corpo). App é sempre escuro (claro recebe mesma paleta).
+  - **Bug 1 (FAB duplicado/cortado)**: "Começar a vender" REMOVIDO; único CTA = FAB redondo "+" no canto, posicionado pelo Scaffold ACIMA da barra de navegação (não sobrepõe).
+  - **Bug 2 (typo)**: "vitre" → "Sua vitrine está vazia" ✓ (verificado no dex).
+  - **Bug 3 (bolinhas coloridas)**: REMOVIDAS. Novo componente IconePlataforma: monograma (ML/EB/SH/OLX/FB/EJ) cinza quando desconectado, cor da marca só quando conectado. Estado comunica por TEXTO ("Conectado" em destaque / "Não conectado").
+  - **Aba ativa**: verde-menta em toda a navegação (era mostarda inconsistente).
+  - **Início**: busca com borda 1px superfície (sem preenchimento chapado), linhas com borda fina 1px sem sombra, preço em destaque 800, empty state com ícone outline.
+  - **Vender**: moldura tracejada 190dp "encaixe o item aqui" (era círculo colorido), botão sólido destaque + secundário texto sublinhado.
+  - **Conexões**: linhas com divisor 1px, monogramas, menu "⋯" p/ desconectar, só cartão da IA com superfície elevada.
+  - **Mensagens**: TODAS as linhas mesma estrutura (monograma+remetente+prévia+horário); sem-API mostra "Abrir conversa" (era lista de pills separada).
+  - **Revisão/Detalhe/Status**: chips limpos, botões IA/Publicar sólidos na destaque, dots coloridos → texto de status.
+  - **Verificação no binário**: versionCode 5 / v3.0, cores v3 presentes + mostarda ausente, nvapi- no dex, strings novas OK, assinatura 5bb25361.
 - [x] 29/09 — **REDESIGN v2.2 (BUILD 19)**: Início — busca pill com ícone e botão limpar, empty state com hero circle + botão "Começar a vender", cards com borda suave e **preço em verde/negrito** + status em badge pill. Vender — hero circle com gradiente verde + ícone PhotoCamera, botões largos com ícones Material (emojis 📷🖼️ removidos). Revisão — plataformas viraram **chips coloridos FlowRow** (dot da marca + nome, tap marca/desmarca) no lugar de checkbox list, botão "Gerar com a IA" virou OutlinedButton full-width com ícone AutoAwesome + spinner inline, back arrow de verdade (ArrowBack). versionCode 4 / 2.2, mesma assinatura, `nvapi-` no dex, strings v2.2 conferidas no dex.
 - [x] 29/09 — **APK 2.0 ESTAVA SEM CHAVE DE IA** (local.properties todo comentado; dex tinha 0 `nvapi-`). Causa do "não tem API". Corrigido: chave NVIDIA recuperada do bash_history, validada (HTTP 200), gravada no local.properties. BUILD 18 assembleRelease **BUILD SUCCESSFUL** (28s falhou por `}` extra meu; fix; depois ~2min). **Verificação no binário: versionCode 3 / 2.1, `nvapi-` 1 ocorrência no dex, strings da UI nova presentes, assinatura 5bb25361 (mesma).** Teste E2E real: POST chat/completions com foto → JSON válido em 62s (NVIDIA lenta hoje; timeout do app = 180s OK). Modelos `llama-3.2-11b/90b-vision` confirmados vivos no catálogo (81 modelos).
 - [x] 29/09 — v2.1: marcador `v2.1` no topo da lista (TopAppBar) + cartão "Inteligência artificial" na tela Conexões mostrando provedor ativo (✓ IA ativa: nvidia) ou "sem chave neste build". Antigos APKs apagados, só `AnunciaAI-2.1.apk` na raiz. Servidor LAN :8899 com só ele.

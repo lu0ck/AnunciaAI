@@ -6,18 +6,20 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.PhotoCamera
-import androidx.compose.material.icons.filled.PhotoLibrary
+import androidx.compose.material.icons.outlined.PhotoCamera
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -26,6 +28,7 @@ import br.com.anunciaai.AnunciaAIApp
 import br.com.anunciaai.ui.BarraInferior
 import br.com.anunciaai.ui.Rotas
 import br.com.anunciaai.ui.foto.FotoUtil
+import br.com.anunciaai.ui.theme.Destaque
 import kotlinx.coroutines.launch
 
 /**
@@ -161,32 +164,28 @@ fun NovaCapturaScreen(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Hero: círculo grande com gradiente da marca
+            // Moldura com cantos pontilhados: "encaixe o item aqui" (sem círculo colorido)
             Box(
                 Modifier
-                    .size(132.dp)
-                    .clip(CircleShape)
-                    .background(
-                        androidx.compose.ui.graphics.Brush.linearGradient(
-                            listOf(
-                                MaterialTheme.colorScheme.primary,
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
-                            )
-                        )
+                    .size(190.dp)
+                    .clip(RoundedCornerShape(24.dp))
+                    .dashedBorder(
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                        shape = RoundedCornerShape(24.dp)
                     ),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    Icons.Default.PhotoCamera, contentDescription = null,
-                    modifier = Modifier.size(56.dp),
-                    tint = MaterialTheme.colorScheme.onPrimary
+                    Icons.Outlined.PhotoCamera, contentDescription = null,
+                    modifier = Modifier.size(52.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             Spacer(Modifier.height(24.dp))
             Text(
                 "Fotografe o item",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.ExtraBold
             )
             Spacer(Modifier.height(8.dp))
             Text(
@@ -196,27 +195,34 @@ fun NovaCapturaScreen(
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
             Spacer(Modifier.height(32.dp))
+            // Primário: sólido, cor de destaque única
             Button(
                 onClick = { iniciarCamera() },
-                Modifier.fillMaxWidth().height(58.dp),
-                shape = RoundedCornerShape(18.dp)
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Destaque,
+                    contentColor = Color(0xFF06231B)
+                )
             ) {
                 Icon(Icons.Default.PhotoCamera, contentDescription = null, Modifier.size(20.dp))
                 Spacer(Modifier.width(10.dp))
                 Text("Tirar foto", style = MaterialTheme.typography.titleMedium)
             }
-            Spacer(Modifier.height(12.dp))
-            OutlinedButton(
-                onClick = {
-                    galeria.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                },
-                Modifier.fillMaxWidth().height(58.dp),
-                shape = RoundedCornerShape(18.dp)
-            ) {
-                Icon(Icons.Default.PhotoLibrary, contentDescription = null, Modifier.size(20.dp))
-                Spacer(Modifier.width(10.dp))
-                Text("Escolher da galeria (até 10)", style = MaterialTheme.typography.titleMedium)
-            }
+            Spacer(Modifier.height(16.dp))
+            // Secundário: texto sublinhado simples — não outro pill vazado
+            Text(
+                "Escolher da galeria (até 10)",
+                style = MaterialTheme.typography.titleSmall,
+                color = Destaque,
+                textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable {
+                        galeria.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                    }
+                    .padding(8.dp)
+            )
             erro?.let {
                 Spacer(Modifier.height(16.dp))
                 Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
@@ -224,3 +230,32 @@ fun NovaCapturaScreen(
         }
     }
 }
+
+/** Borda pontilhada (moldura de "encaixe o item aqui"). */
+private fun Modifier.dashedBorder(color: Color, shape: RoundedCornerShape): Modifier =
+    this.then(
+        Modifier.drawBehind {
+            val stroke = 2.dp.toPx()
+            val path = androidx.compose.ui.graphics.Path().apply {
+                addRoundRect(
+                    androidx.compose.ui.geometry.RoundRect(
+                        rect = androidx.compose.ui.geometry.Rect(
+                            left = stroke / 2, top = stroke / 2,
+                            right = size.width - stroke / 2, bottom = size.height - stroke / 2
+                        ),
+                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(
+                            24.dp.toPx() / 2, 24.dp.toPx() / 2
+                        )
+                    )
+                )
+            }
+            drawPath(
+                path = path,
+                color = color,
+                style = androidx.compose.ui.graphics.drawscope.Stroke(
+                    width = stroke,
+                    pathEffect = androidx.compose.ui.graphics.PathEffect.dashPathEffect(floatArrayOf(18f, 14f))
+                )
+            )
+        }
+    )
