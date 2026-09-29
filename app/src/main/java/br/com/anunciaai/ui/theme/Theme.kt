@@ -27,15 +27,23 @@ val CorTextoSec = Color(0xFF8B909A)   // texto secundário/legenda
 val CorNeutro = Color(0xFF4B505B)     // status neutro (desconectado, pendente)
 val CorErro = Color(0xFFFF5470)       // erro
 
-// Cores de marca reais — usadas APENAS no monograma da plataforma CONECTADA
+// Cores de marca REAIS (v4) — badge de cada plataforma em toda a lista, Mensagens e selos "publicado em"
 val CorPlataforma = mapOf(
     "MERCADO_LIVRE" to Color(0xFFFFE600),
-    "EBAY" to Color(0xFFE53238),
+    "EBAY" to Color(0xFF0064D2), // badge eBay é multicor (ver IconePlataforma); fallback azul
     "SHOPEE" to Color(0xFFEE4D2D),
-    "OLX" to Color(0xFF9D6CFF),
-    "FACEBOOK_MARKETPLACE" to Color(0xFF4C9BFF),
-    "ENJOEI" to Color(0xFFFF6E9C)
+    "OLX" to Color(0xFF7C1FD6),
+    "FACEBOOK_MARKETPLACE" to Color(0xFF1877F2),
+    "ENJOEI" to Color(0xFFFF2D78)
 )
+
+// Detalhe azul do ML sobre o amarelo; as demais usam branco
+val CorTextoMarca = mapOf(
+    "MERCADO_LIVRE" to Color(0xFF2D3277)
+)
+
+// Fim do gradiente do card de resumo (#00C896 → #0A5C6E)
+val Petroleo = Color(0xFF0A5C6E)
 
 private val EsquemaEscuro = darkColorScheme(
     primary = Destaque,

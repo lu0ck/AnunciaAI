@@ -7,6 +7,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.NavType
+import br.com.anunciaai.ui.screens.AnaliseScreen
 import br.com.anunciaai.ui.screens.ConexoesScreen
 import br.com.anunciaai.ui.screens.DetalheItemScreen
 import br.com.anunciaai.ui.screens.ListaItensScreen
@@ -20,10 +21,12 @@ object Rotas {
     const val CAPTURA = "captura"
     const val CONEXOES = "conexoes"
     const val MENSAGENS = "mensagens"
+    const val ANALISE = "analise/{itemId}"
     const val REVISAO = "revisao/{itemId}"
     const val STATUS = "status/{itemId}"
     const val DETALHE = "detalhe/{itemId}"
 
+    fun analise(itemId: Long) = "analise/$itemId"
     fun revisao(itemId: Long) = "revisao/$itemId"
     fun status(itemId: Long) = "status/$itemId"
     fun detalhe(itemId: Long) = "detalhe/$itemId"
@@ -63,11 +66,27 @@ fun AnunciaAINavGraph() {
             NovaCapturaScreen(
                 onVoltar = { nav.popBackStack() },
                 onItemCriado = { itemId ->
-                    nav.navigate(Rotas.revisao(itemId)) {
+                    // v4: fotos → tela de análise com pilha de cards → revisão
+                    nav.navigate(Rotas.analise(itemId)) {
                         popUpTo(Rotas.CAPTURA) { inclusive = true }
                     }
                 },
                 onNavBottom = navBottom
+            )
+        }
+        composable(
+            Rotas.ANALISE,
+            arguments = listOf(navArgument("itemId") { type = NavType.LongType })
+        ) { entrada ->
+            val itemId = entrada.arguments?.getLong("itemId") ?: 0L
+            AnaliseScreen(
+                itemId = itemId,
+                onVerAnuncio = { id ->
+                    nav.navigate(Rotas.revisao(id)) {
+                        popUpTo(Rotas.CAPTURA) { inclusive = true }
+                    }
+                },
+                onVoltar = { nav.popBackStack() }
             )
         }
         composable(
