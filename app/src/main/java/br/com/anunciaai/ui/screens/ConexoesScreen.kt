@@ -4,8 +4,11 @@ import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Key
+import androidx.compose.material.icons.filled.KeyOff
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material3.*
@@ -86,6 +89,44 @@ fun ConexoesScreen() {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(vertical = 4.dp)
             )
+
+            // v5.4 (PASSO 2): estado das credenciais OAuth do ML — interface clara
+            // do que falta pra publicação via API funcionar (lidas do local.properties
+            // via BuildConfig; nada de segredo em runtime)
+            val temChavesML = CredenciaisML.clientId() != null && CredenciaisML.clientSecret() != null
+            Surface(
+                shape = RoundedCornerShape(14.dp),
+                color = MaterialTheme.colorScheme.surfaceContainer,
+                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+            ) {
+                Row(
+                    Modifier.padding(14.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        if (temChavesML) Icons.Default.Key else Icons.Default.KeyOff,
+                        contentDescription = null,
+                        tint = if (temChavesML) Destaque else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.width(12.dp))
+                    Column {
+                        Text(
+                            if (temChavesML) "Credenciais do Mercado Livre prontas"
+                            else "Faltam as credenciais do Mercado Livre",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Text(
+                            if (temChavesML)
+                                "OAuth configurado — toque em Conectar no Mercado Livre abaixo."
+                            else "Crie o app no DevCenter (developers.mercadolivre.com.br), copie " +
+                                "ANUNCIAAI_ML_CLIENT_ID e ANUNCIAAI_ML_CLIENT_SECRET pro local.properties e reconstrua.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
 
             // Linhas de lista separadas por traço fino de 1px na cor da superfície
             Plataforma.entries.forEachIndexed { idx, plat ->

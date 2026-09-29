@@ -1,5 +1,9 @@
 package br.com.anunciaai.ui.screens
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -17,6 +21,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -58,6 +63,18 @@ fun ListaItensScreen(
     val valorEstoque = itens.filter { it.id !in vendidosIds }
         .sumOf { it.precoFinal.takeIf { p -> p > 0 } ?: it.precoSugerido }
 
+    // v5.4: count-up animado do valor (0 → valor real, 900ms spring suave)
+    var animIniciou by remember { mutableStateOf(false) }
+    LaunchedEffect(valorEstoque) {
+        animIniciou = true
+    }
+    val proporcao by animateFloatAsState(
+        targetValue = if (animIniciou) 1f else 0f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow),
+        label = "countup"
+    )
+    val valorAnimado = valorEstoque * proporcao
+
     // Vendas por plataforma: TODAS, com valor vendido e variação vs semana anterior
     val agora = System.currentTimeMillis()
     val semana = 7L * 24 * 3600 * 1000
@@ -95,10 +112,17 @@ fun ListaItensScreen(
         },
         bottomBar = { BarraInferior(Rotas.LISTA, onNavBottom) },
         floatingActionButton = {
+            // v5.4: FAB com spring — cresce suave ao entrar na tela
+            val escala by animateFloatAsState(
+                targetValue = 1f,
+                animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium),
+                label = "fab"
+            )
             FloatingActionButton(
                 onClick = onNovoItem,
                 containerColor = Destaque,
-                contentColor = Color(0xFF06231B)
+                contentColor = Color(0xFF06231B),
+                modifier = Modifier.scale(escala)
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Novo item")
             }
@@ -145,7 +169,7 @@ fun ListaItensScreen(
                                 color = Color(0xFF04150F).copy(alpha = 0.75f)
                             )
                             Text(
-                                "R$ ${"%,.2f".format(valorEstoque)}",
+                                "R$ ${"%,.2f".format(valorAnimado)}",
                                 style = MaterialTheme.typography.displaySmall,
                                 fontWeight = FontWeight.ExtraBold,
                                 color = Color(0xFF04150F)

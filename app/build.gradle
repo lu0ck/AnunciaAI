@@ -14,8 +14,8 @@ android {
         applicationId "br.com.anunciaai"
         minSdk 26
         targetSdk 35
-        versionCode 11
-        versionName "5.3"
+        versionCode 12
+        versionName "5.4"
 
         // Chaves OAuth/IA: lidas do local.properties (não versionado), vazias por padrão.
         // Preencha: ANUNCIAAI_ML_CLIENT_ID / ANUNCIAAI_ML_CLIENT_SECRET /

@@ -7,6 +7,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.NavType
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.core.tween
 import br.com.anunciaai.ui.screens.AnaliseScreen
 import br.com.anunciaai.ui.screens.ConexoesScreen
 import br.com.anunciaai.ui.screens.DetalheItemScreen
@@ -48,7 +53,15 @@ fun AnunciaAINavGraph() {
         }
     }
 
-    NavHost(navController = nav, startDestination = Rotas.LISTA) {
+    NavHost(
+        navController = nav,
+        startDestination = Rotas.LISTA,
+        // v5.4: transições suaves entre telas (fade + slide sutil)
+        enterTransition = { fadeIn(tween(220)) + slideInHorizontally(tween(220)) { it / 4 } },
+        exitTransition = { fadeOut(tween(180)) },
+        popEnterTransition = { fadeIn(tween(220)) + slideInHorizontally(tween(220)) { -it / 4 } },
+        popExitTransition = { fadeOut(tween(180)) + slideOutHorizontally(tween(220)) { it / 4 } }
+    ) {
         composable(Rotas.LISTA) {
             ListaItensScreen(
                 onNovoItem = { nav.navigate(Rotas.CAPTURA) },

@@ -70,6 +70,12 @@ Kotlin + Jetpack Compose · Room · Retrofit/OkHttp · WebView (`evaluateJavascr
 - (nada — todos os builds passaram)
 
 ## Feito (adicional, depois do build 1)
+- [x] 29/09 — **v5.4 (BUILD 27) — micro-interações premium + interface de credenciais ML:**
+  - **Transições de tela** no NavHost: fade+slide horizontal sutil (enter 220ms, exit 180ms, pop reverso).
+  - **Count-up animado** do "Valor em estoque": 0 → valor real com spring (DampingRatioLowBouncy/StiffnessLow).
+  - **FAB com spring** de escala; **balão da câmera flutuando** (infinite transition, ±4dp, 1400ms reverso).
+  - **PASSO 2 (interface credenciais ML)**: cartão na aba Conexões mostrando estado do OAuth — ícone Key/KeyOff + "Credenciais do Mercado Livre prontas" (verde) ou "Faltam as credenciais" com instrução completa do DevCenter (developers.mercadolivre.com.br → ANUNCIAAI_ML_CLIENT_ID/SECRET → rebuild). Lê do BuildConfig — nenhum segredo em runtime.
+  - **Verificação**: versionCode 12 / v5.4; strings do cartão OK no dex; animações confirmadas via mapping.txt do R8 (BalaoDica linhas 329-340 mapeadas — R8 ofusca nomes de API, strings de usuário passam). Assinatura 5bb25361, nvapi- OK.
 - [x] 29/09 — **v5.3 ITENS 2+3+4 (BUILD 26) — acabamento premium:**
   - **ITEM 2 — Pills de filtro nas Mensagens**: LazyRow no topo com "Todas / Não lidas / Ofertas". Ativo = fundo destaque #00C896 + texto branco; inativo = cinza-escuro #23272E + texto claro. Filtro real: Não lidas = perguntas do ML (API), Ofertas = plataformas WebView, Todas = inbox completo.
   - **ITEM 3 — Empty states premium**: novo componente `EstadoVazio` (reutilizável) — ícone grande 64dp minimalista, título em destaque, subtítulo explicativo e botão secundário LARGO fundo cinza #2E3440 + texto branco. Aplicado em Mensagens (ícone envelope, "Nada por aqui ainda" + "Conectar plataformas" que navega pra aba Conexões) e na vitrine (ícone caixa aberta Inventory2, "Explorar itens" que abre a câmera).

@@ -11,6 +11,13 @@ import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview as CameraPreview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -29,6 +36,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
@@ -316,10 +324,21 @@ private fun CantoneirasEnquadramento() {
     }
 }
 
-/** Balão branco arredondado com seta pra baixo (aponta pro botão de captura). */
+/** Balão branco arredondado com seta pra baixo — flutua suavemente (v5.4). */
 @Composable
 private fun BalaoDica() {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    // flutuação sutil: sobe/desce 4dp em loop
+    val transicao = rememberInfiniteTransition(label = "balao")
+    val flutua by transicao.animateFloat(
+        initialValue = -4f,
+        targetValue = 4f,
+        animationSpec = infiniteRepeatable(tween(1400), RepeatMode.Reverse),
+        label = "flutua"
+    )
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.graphicsLayer { translationY = flutua }
+    ) {
         Box {
             Column(
                 Modifier
