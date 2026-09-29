@@ -70,6 +70,11 @@ Kotlin + Jetpack Compose · Room · Retrofit/OkHttp · WebView (`evaluateJavascr
 - (nada — todos os builds passaram)
 
 ## Feito (adicional, depois do build 1)
+- [x] 29/09 — **v5.3 ITENS 2+3+4 (BUILD 26) — acabamento premium:**
+  - **ITEM 2 — Pills de filtro nas Mensagens**: LazyRow no topo com "Todas / Não lidas / Ofertas". Ativo = fundo destaque #00C896 + texto branco; inativo = cinza-escuro #23272E + texto claro. Filtro real: Não lidas = perguntas do ML (API), Ofertas = plataformas WebView, Todas = inbox completo.
+  - **ITEM 3 — Empty states premium**: novo componente `EstadoVazio` (reutilizável) — ícone grande 64dp minimalista, título em destaque, subtítulo explicativo e botão secundário LARGO fundo cinza #2E3440 + texto branco. Aplicado em Mensagens (ícone envelope, "Nada por aqui ainda" + "Conectar plataformas" que navega pra aba Conexões) e na vitrine (ícone caixa aberta Inventory2, "Explorar itens" que abre a câmera).
+  - **ITEM 4 — Vitrine em GRID de 2 colunas**: LazyVerticalGrid substituiu a LazyRow horizontal (spec revogou o formato anterior). Foto proeminente 130dp com **selos das plataformas sobrepostos no canto da própria foto** (pilha tipo moedas), abaixo Nome (linha 1, cinza claro #8B909A) e Preço (linha 2, branco #F2F2F0 negrito).
+  - **Verificado no binário**: versionCode 11 / v5.3, strings dos 3 itens OK, LazyVerticalGrid no dex, nvapi- OK, assinatura 5bb25361.
 - [x] 29/09 — **v5.2 ITEM 1 (BUILD 25) — Câmera Imersiva full-screen (CameraX in-app):**
   - Trocada a câmera do SISTEMA (TakePicture) por **CameraX in-app**: preview live ocupando a tela toda (moldura tracejada e tela "Vender" de formulário REMOVIDAS).
   - **4 cantoneiras brancas finas** (3dp, 36dp de comprimento, cantos arredondados) no centro como guia de enquadramento — Canvas custom.

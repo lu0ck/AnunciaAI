@@ -2,15 +2,17 @@ package br.com.anunciaai.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.TrendingDown
 import androidx.compose.material.icons.filled.TrendingUp
+import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -224,7 +226,7 @@ fun ListaItensScreen(
                 }
             }
 
-            // ── Itens recentes: scroll HORIZONTAL ──
+            // ── Vitrine: GRID de 2 colunas (ITEM 4) ──
             item {
                 Spacer(Modifier.height(4.dp))
                 Text("Itens recentes", style = MaterialTheme.typography.titleMedium)
@@ -232,26 +234,24 @@ fun ListaItensScreen(
             }
             item {
                 if (itens.isEmpty()) {
-                    Column(
-                        Modifier.fillMaxWidth().padding(vertical = 32.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            "Sua vitrine está vazia",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Text(
-                            "Toque no + para fotografar um item",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        br.com.anunciaai.ui.EstadoVazio(
+                            icone = androidx.compose.material.icons.Icons.Outlined.Inventory2,
+                            titulo = "Sua vitrine está vazia",
+                            subtitulo = "Fotografe um item e a IA escreve o anúncio inteiro pra você.",
+                            textoBotao = "Explorar itens",
+                            onBotao = onNovoItem
                         )
                     }
                 } else {
-                    LazyRow(
+                    val ordenados = itens.sortedByDescending { it.dataCriacao }
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(2),
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        contentPadding = PaddingValues(end = 8.dp)
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.height(((ordenados.size + 1) / 2 * 260).dp)
                     ) {
-                        items(itens.sortedByDescending { it.dataCriacao }, key = { "it_${it.id}" }) { item ->
+                        items(ordenados, key = { "it_${it.id}" }) { item ->
                             CardRecente(
                                 item = item,
                                 plataformas = pubs.filter { it.itemId == item.id }.map { it.plataforma },
@@ -265,7 +265,8 @@ fun ListaItensScreen(
     }
 }
 
-/** Card vertical de item recente: foto no topo, preço, selos empilhados. */
+/** Card do grid (ITEM 4): foto proeminente com selos SOBREPOSTOS no canto da foto,
+ *  abaixo Nome (cinza claro) e Preço (branco, negrito). */
 @Composable
 private fun CardRecente(
     item: br.com.anunciaai.dados.Item,
@@ -277,21 +278,26 @@ private fun CardRecente(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        modifier = Modifier.width(150.dp)
+        modifier = Modifier.fillMaxWidth()
     ) {
         Column {
             Box(
                 Modifier
                     .fillMaxWidth()
-                    .height(110.dp)
+                    .height(130.dp)
                     .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
             ) {
-                FotoPrimeira(item.id, tamanho = 220)
+                FotoPrimeira(item.id, tamanho = 260)
+                // selos das plataformas sobrepostos no canto da própria foto
+                Box(Modifier.align(Alignment.BottomStart).padding(8.dp)) {
+                    PilhaBadges(plataformas)
+                }
             }
-            Column(Modifier.padding(10.dp)) {
+            Column(Modifier.padding(horizontal = 10.dp, vertical = 8.dp)) {
                 Text(
                     item.titulo.ifEmpty { "(sem título)" },
-                    style = MaterialTheme.typography.titleSmall,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant, // cinza claro (linha 1)
                     maxLines = 1, overflow = TextOverflow.Ellipsis
                 )
                 Spacer(Modifier.height(2.dp))
@@ -299,10 +305,8 @@ private fun CardRecente(
                     "R$ ${"%.2f".format(item.precoFinal.takeIf { it > 0 } ?: item.precoSugerido)}",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.ExtraBold,
-                    color = Destaque
+                    color = androidx.compose.ui.graphics.Color(0xFFF2F2F0) // branco (linha 2)
                 )
-                Spacer(Modifier.height(6.dp))
-                PilhaBadges(plataformas)
             }
         }
     }
