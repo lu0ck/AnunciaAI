@@ -70,6 +70,7 @@ Kotlin + Jetpack Compose · Room · Retrofit/OkHttp · WebView (`evaluateJavascr
 - (nada — todos os builds passaram)
 
 ## Feito (adicional, depois do build 1)
+- [x] 29/09 — **v5.1 (BUILD 24): REVERSÃO DO RENAME — app volta a ser AnunciaAI.** Lucas desfez o equívoco ("não é pra mudar de nome, é pra continuar anunciaai"). Label strings.xml + top bar revertidos, verificado no arsc (zero resíduo de "VendeAi"). versionCode 9 / v5.1. NOTA: durante a entrega o SSD_Games_2 DESMONTOU sozinho DUAS VEZES (NTFS sda1 instável; sistema reiniciou antes) — remontado via `udisksctl mount -b /dev/sda1`, nada perdido. Se sumir de novo: remontar com o mesmo comando.
 - [x] 29/09 — **v5.0 PASSO 1 (BUILD 23) — rename VendeAi + audit do dashboard contra a spec:**
   - **Rename visível**: app_name e top bar agora **VendeAi** (verificado no arsc + dex). Pacote segue `br.com.anunciaai` de propósito — trocar applicationId quebraria upgrade da assinatura e o deep link OAuth já registrado.
   - **Itens recentes agora é scroll HORIZONTAL** (spec pedia; era vertical): LazyRow de cards 150dp com foto 110dp no topo, título, preço destaque e pilha de selos de plataforma.

@@ -76,7 +76,7 @@ fun ListaItensScreen(
             TopAppBar(
                 title = {
                     Text(
-                        "VendeAi",
+                        "AnunciaAI",
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.ExtraBold
                     )
