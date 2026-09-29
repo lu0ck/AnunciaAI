@@ -15,6 +15,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -37,6 +38,7 @@ import br.com.anunciaai.ui.Plataforma
 import br.com.anunciaai.ui.Rotas
 import br.com.anunciaai.ui.foto.CarrosselFotos
 import br.com.anunciaai.ui.foto.FotoUtil
+import br.com.anunciaai.ui.theme.CorPlataforma
 import br.com.anunciaai.ui.theme.Destaque
 import kotlinx.coroutines.launch
 
@@ -231,18 +233,31 @@ fun RevisaoScreen(
             }
 
             Column(Modifier.padding(horizontal = 16.dp)) {
+                // v4.1: campos no padrão do app — fundo elevado #1B1F26, sem borda visível
                 OutlinedTextField(
                     value = titulo, onValueChange = { titulo = it },
                     label = { Text("Título (até 60 caracteres)") },
                     modifier = Modifier.fillMaxWidth(),
-                    shape = MaterialTheme.shapes.small
+                    shape = MaterialTheme.shapes.small,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = androidx.compose.ui.graphics.Color.Transparent,
+                        unfocusedBorderColor = androidx.compose.ui.graphics.Color.Transparent,
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer
+                    )
                 )
                 Spacer(Modifier.height(10.dp))
                 OutlinedTextField(
                     value = descricao, onValueChange = { descricao = it },
                     label = { Text("Descrição") },
                     modifier = Modifier.fillMaxWidth(), minLines = 3,
-                    shape = MaterialTheme.shapes.small
+                    shape = MaterialTheme.shapes.small,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = androidx.compose.ui.graphics.Color.Transparent,
+                        unfocusedBorderColor = androidx.compose.ui.graphics.Color.Transparent,
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer
+                    )
                 )
                 Spacer(Modifier.height(10.dp))
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -251,40 +266,46 @@ fun RevisaoScreen(
                         label = { Text("Preço R$") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         modifier = Modifier.weight(1f),
-                        shape = MaterialTheme.shapes.small
+                        shape = MaterialTheme.shapes.small,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = androidx.compose.ui.graphics.Color.Transparent,
+                            unfocusedBorderColor = androidx.compose.ui.graphics.Color.Transparent,
+                            focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer
+                        )
                     )
                     OutlinedTextField(
                         value = categoria, onValueChange = { categoria = it },
                         label = { Text("Categoria") },
                         modifier = Modifier.weight(1f),
-                        shape = MaterialTheme.shapes.small
+                        shape = MaterialTheme.shapes.small,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = androidx.compose.ui.graphics.Color.Transparent,
+                            unfocusedBorderColor = androidx.compose.ui.graphics.Color.Transparent,
+                            focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer
+                        )
                     )
                 }
-                Row(
-                    Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                Spacer(Modifier.height(12.dp))
+                // v4.1 (bug do chip vertical): FlowRow — chips de condição quebram por PALAVRA,
+                // nunca por caractere, e o tamanho se ajusta ao conteúdo
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    FilterChip(
-                        selected = condicao.startsWith("novo", true),
-                        onClick = { condicao = "novo" },
-                        label = { Text("novo") }
-                    )
-                    FilterChip(
-                        selected = condicao.contains("como novo"),
-                        onClick = { condicao = "usado - como novo" },
-                        label = { Text("como novo") }
-                    )
-                    FilterChip(
-                        selected = condicao.contains("bom estado"),
-                        onClick = { condicao = "usado - bom estado" },
-                        label = { Text("bom estado") }
-                    )
-                    FilterChip(
-                        selected = condicao.contains("marcas"),
-                        onClick = { condicao = "usado - com marcas de uso" },
-                        label = { Text("marcas de uso") }
-                    )
+                    listOf(
+                        "novo" to "novo",
+                        "usado - como novo" to "como novo",
+                        "usado - bom estado" to "bom estado",
+                        "usado - com marcas de uso" to "marcas de uso"
+                    ).forEach { (valor, rotulo) ->
+                        FilterChip(
+                            selected = condicao == valor,
+                            onClick = { condicao = valor },
+                            label = { Text(rotulo) }
+                        )
+                    }
                 }
                 // Ação principal: sólida, cor de destaque única
                 Button(
@@ -321,12 +342,22 @@ fun RevisaoScreen(
                 ) {
                     Plataforma.entries.forEach { plat ->
                         val marcada = marcadas.contains(plat)
-                        // Chip limpo: sem dot decorativo — o estado é o chip selecionado
+                        val corMarca = CorPlataforma[plat.name] ?: Destaque
+                        // v4.1: chip com a COR DA MARCA — preenchido quando selecionado,
+                        // só contornado na cor da marca quando não. eBay: contorno branco (multicor).
+                        val corContorno = if (plat.name == "EBAY") androidx.compose.ui.graphics.Color.White else corMarca
                         FilterChip(
                             selected = marcada,
                             onClick = {
                                 marcadas = if (marcada) marcadas - plat else marcadas + plat
                             },
+                            border = androidx.compose.foundation.BorderStroke(1.dp, corContorno),
+                            colors = androidx.compose.material3.FilterChipDefaults.filterChipColors(
+                                containerColor = androidx.compose.ui.graphics.Color.Transparent,
+                                selectedContainerColor = corMarca,
+                                labelColor = if (plat.name == "MERCADO_LIVRE") androidx.compose.ui.graphics.Color(0xFF2D3277) else androidx.compose.ui.graphics.Color.White,
+                                selectedLabelColor = if (plat.name == "MERCADO_LIVRE") androidx.compose.ui.graphics.Color(0xFF2D3277) else androidx.compose.ui.graphics.Color.White
+                            ),
                             label = { Text(plat.rotulo) }
                         )
                     }
@@ -335,11 +366,18 @@ fun RevisaoScreen(
                     .filter { marcadas.contains(it) && (if (it.precisaOAuth) !conectadas.contains(it.name) else false) }
                 if (naoConectadas.isNotEmpty()) {
                     Spacer(Modifier.height(8.dp))
-                    Text(
-                        "Aviso: ${naoConectadas.joinToString { it.rotulo }} sem conexão — conecte na aba Conexões ou o anúncio vai falhar.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            Icons.Default.WarningAmber, contentDescription = null,
+                            tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(Modifier.width(6.dp))
+                        Text(
+                            "${naoConectadas.joinToString { it.rotulo }} sem conexão — conecte na aba Conexões ou o anúncio vai falhar.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
 
                 erro?.let {

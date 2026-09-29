@@ -26,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.compose.foundation.layout.statusBarsPadding
 import br.com.anunciaai.AnunciaAIApp
 import br.com.anunciaai.ia.FabricaIA
 import br.com.anunciaai.ui.foto.FotoUtil
@@ -122,7 +123,7 @@ fun AnaliseScreen(
 
     Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         Column(
-            Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 32.dp),
+            Modifier.fillMaxSize().statusBarsPadding().padding(horizontal = 24.dp, vertical = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text("Analisando fotos", style = MaterialTheme.typography.headlineSmall,

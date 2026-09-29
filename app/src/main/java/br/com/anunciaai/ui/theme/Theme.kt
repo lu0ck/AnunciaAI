@@ -106,19 +106,15 @@ private val EsquemaClaro = lightColorScheme(
     onErrorContainer = Color(0xFFFFB3C2)
 )
 
-// Manrope: família única. 400 (corpo), 600 (subtítulo), 800 (título) — pesos da fonte variável.
-@OptIn(androidx.compose.ui.text.ExperimentalTextApi::class)
+// Manrope em PESOS ESTÁTICOS (v4.1): a fonte variável + variationSettings tinha bug de
+// shaping no Android que quebrava palavras com "L" maiúsculo ("Livros" → "l ivros").
+// Cada peso é um arquivo próprio em res/font — sem variationSettings.
 val Manrope = FontFamily(
-    Font(R.font.manrope, FontWeight.Normal,
-        variationSettings = FontVariation.Settings(FontVariation.weight(400))),
-    Font(R.font.manrope, FontWeight.Medium,
-        variationSettings = FontVariation.Settings(FontVariation.weight(500))),
-    Font(R.font.manrope, FontWeight.SemiBold,
-        variationSettings = FontVariation.Settings(FontVariation.weight(600))),
-    Font(R.font.manrope, FontWeight.Bold,
-        variationSettings = FontVariation.Settings(FontVariation.weight(700))),
-    Font(R.font.manrope, FontWeight.ExtraBold,
-        variationSettings = FontVariation.Settings(FontVariation.weight(800)))
+    Font(R.font.manrope_regular, FontWeight.Normal),
+    Font(R.font.manrope_medium, FontWeight.Medium),
+    Font(R.font.manrope_semibold, FontWeight.SemiBold),
+    Font(R.font.manrope_bold, FontWeight.Bold),
+    Font(R.font.manrope_extrabold, FontWeight.ExtraBold)
 )
 
 // Tipografia da spec: título de tela 28/800, título de linha 16/600, corpo 14/400 — sem caixa alta.
