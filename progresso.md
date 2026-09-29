@@ -70,6 +70,8 @@ Kotlin + Jetpack Compose · Room · Retrofit/OkHttp · WebView (`evaluateJavascr
 - (nada — todos os builds passaram)
 
 ## Feito (adicional, depois do build 1)
+- [x] 29/09 — **APK 2.0 ESTAVA SEM CHAVE DE IA** (local.properties todo comentado; dex tinha 0 `nvapi-`). Causa do "não tem API". Corrigido: chave NVIDIA recuperada do bash_history, validada (HTTP 200), gravada no local.properties. BUILD 18 assembleRelease **BUILD SUCCESSFUL** (28s falhou por `}` extra meu; fix; depois ~2min). **Verificação no binário: versionCode 3 / 2.1, `nvapi-` 1 ocorrência no dex, strings da UI nova presentes, assinatura 5bb25361 (mesma).** Teste E2E real: POST chat/completions com foto → JSON válido em 62s (NVIDIA lenta hoje; timeout do app = 180s OK). Modelos `llama-3.2-11b/90b-vision` confirmados vivos no catálogo (81 modelos).
+- [x] 29/09 — v2.1: marcador `v2.1` no topo da lista (TopAppBar) + cartão "Inteligência artificial" na tela Conexões mostrando provedor ativo (✓ IA ativa: nvidia) ou "sem chave neste build". Antigos APKs apagados, só `AnunciaAI-2.1.apk` na raiz. Servidor LAN :8899 com só ele.
 - [x] 26/09 — BUILD 4 `assembleDebug` **BUILD SUCCESSFUL** (52s) — todas as fases compilam
 - [x] 26/09 — JDK Temurin 17 portátil instalado (jdk-17.0.20.1+1/) — o Java 21 do sistema é só JRE, sem javac
 - [x] 26/09 — Keystore criada (anunciaai.keystore, alias anunciaai, senha no ambiente — NÃO commitada)
@@ -103,8 +105,8 @@ GRADLE_USER_HOME=$PWD/.gradle-home ANDROID_HOME=$PWD/android-sdk JAVA_HOME=$PWD/
 ```
 
 ## Planejado (próximos passos, precisa do celular/chaves)
-- [ ] **APK 2.0 NÃO TEM CHAVE DE IA (achado 28/09, verificado no dex: 0 ocorrências de `nvapi-`/`AIza`/`DASHSCOPE`)** — `local.properties` está com todas as chaves comentadas (mtime 27/09 14:59). Sem chave, `FabricaIA.criar()` → null e a revisão cai em preenchimento manual. **Antes de testar a IA: descomentar/preencher `ANUNCIAAI_NVIDIA_KEY` e rebuildar (BUILD 18).**
-- [ ] Instalar `anunciaai-v2-release.apk` no celular (substitui a v1 — mesma assinatura) e testar o fluxo completo
+- [x] ~~APK 2.0 NÃO TEM CHAVE DE IA~~ **RESOLVIDO 29/09** — chave NVIDIA no local.properties, BUILD 18 com `nvapi-` no dex (verificado). Verificação E2E real da IA passou (JSON válido).
+- [ ] Instalar `AnunciaAI-2.1.apk` no celular (substitui a v1/v2 — mesma assinatura) e testar o fluxo completo. **Ao abrir: tem que aparecer "v2.1" no topo da lista e "✓ IA ativa: nvidia" na aba Conexões — senão o APK velho ficou instalado.**
 - [ ] Teste real: IA multi-fotos (NVIDIA ok), ML OAuth (precisa app no DevCenter), OLX WebView
 - [ ] Teste real das Mensagens ML (precisa OAuth + anúncio com perguntas)
 

@@ -56,7 +56,24 @@ fun ConexoesScreen() {
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(8.dp))
+
+            // Cartão da IA: mostra se a chave está embutida NESTE build (versionCode 3+).
+            // Se aparecer "manual", o APK foi buildado sem chave — rebuildar com local.properties preenchido.
+            Card(Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+                Column(Modifier.padding(14.dp)) {
+                    val provedor = br.com.anunciaai.ia.FabricaIA.nomeAtivo()
+                    Text("Inteligência artificial", style = MaterialTheme.typography.titleSmall)
+                    Text(
+                        if (provedor != null) "✓ IA ativa: $provedor — toque em Publicar item e a descrição sai pronta"
+                        else "✗ Sem chave de IA neste build — preenchimento manual (rebuildar com local.properties)",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (provedor != null) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+            Spacer(Modifier.height(8.dp))
 
             Plataforma.entries.forEach { plat ->
                 val conectada = if (plat.precisaOAuth) conectadas.contains(plat.name) else conectadas.contains(plat.name)

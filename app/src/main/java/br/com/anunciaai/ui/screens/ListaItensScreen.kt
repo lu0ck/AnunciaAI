@@ -38,7 +38,16 @@ fun ListaItensScreen(
     val itens by app.repositorio.itensComBusca(busca).collectAsState(initial = emptyList())
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("AnunciaAI") }) },
+        topBar = { TopAppBar(
+            title = { Text("AnunciaAI") },
+            // Marcador de build: prova visual de qual APK está instalado.
+            actions = { Text(
+                "v${br.com.anunciaai.BuildConfig.VERSION_NAME}",
+                Modifier.padding(horizontal = 16.dp),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            ) }
+        ) },
         bottomBar = { BarraInferior(Rotas.LISTA, onNavBottom) },
         floatingActionButton = {
             ExtendedFloatingActionButton(onClick = onNovoItem) { Text("Publicar item") }
