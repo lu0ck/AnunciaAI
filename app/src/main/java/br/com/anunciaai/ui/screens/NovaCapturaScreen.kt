@@ -5,12 +5,21 @@ import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import br.com.anunciaai.AnunciaAIApp
@@ -137,36 +146,76 @@ fun NovaCapturaScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Vender — fotos do item") },
-                navigationIcon = { TextButton(onClick = onVoltar) { Text("←") } }
+                title = { Text("Vender", style = MaterialTheme.typography.titleLarge) },
+                navigationIcon = {
+                    IconButton(onClick = onVoltar) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Voltar")
+                    }
+                }
             )
         },
         bottomBar = { BarraInferior(Rotas.CAPTURA, onNavBottom) }
     ) { pad ->
         Column(
-            Modifier.padding(pad).padding(24.dp).fillMaxSize(),
+            Modifier.padding(pad).padding(horizontal = 28.dp).fillMaxSize(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Fotografe o item", style = MaterialTheme.typography.headlineSmall)
+            // Hero: círculo grande com gradiente da marca
+            Box(
+                Modifier
+                    .size(132.dp)
+                    .clip(CircleShape)
+                    .background(
+                        androidx.compose.ui.graphics.Brush.linearGradient(
+                            listOf(
+                                MaterialTheme.colorScheme.primary,
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
+                            )
+                        )
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.Default.PhotoCamera, contentDescription = null,
+                    modifier = Modifier.size(56.dp),
+                    tint = MaterialTheme.colorScheme.onPrimary
+                )
+            }
+            Spacer(Modifier.height(24.dp))
+            Text(
+                "Fotografe o item",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold
+            )
             Spacer(Modifier.height(8.dp))
             Text(
                 "Várias fotos ajudam a IA a ver o estado real — defeito vira desconto no preço sugerido.",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
-            Spacer(Modifier.height(24.dp))
-            Button(onClick = { iniciarCamera() }, Modifier.fillMaxWidth().height(56.dp)) {
-                Text("📷  Tirar foto")
+            Spacer(Modifier.height(32.dp))
+            Button(
+                onClick = { iniciarCamera() },
+                Modifier.fillMaxWidth().height(58.dp),
+                shape = RoundedCornerShape(18.dp)
+            ) {
+                Icon(Icons.Default.PhotoCamera, contentDescription = null, Modifier.size(20.dp))
+                Spacer(Modifier.width(10.dp))
+                Text("Tirar foto", style = MaterialTheme.typography.titleMedium)
             }
             Spacer(Modifier.height(12.dp))
             OutlinedButton(
                 onClick = {
                     galeria.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
                 },
-                Modifier.fillMaxWidth().height(56.dp)
+                Modifier.fillMaxWidth().height(58.dp),
+                shape = RoundedCornerShape(18.dp)
             ) {
-                Text("🖼️  Escolher da galeria (até 10)")
+                Icon(Icons.Default.PhotoLibrary, contentDescription = null, Modifier.size(20.dp))
+                Spacer(Modifier.width(10.dp))
+                Text("Escolher da galeria (até 10)", style = MaterialTheme.typography.titleMedium)
             }
             erro?.let {
                 Spacer(Modifier.height(16.dp))

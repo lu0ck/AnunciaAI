@@ -9,13 +9,18 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
@@ -35,7 +40,7 @@ import br.com.anunciaai.ui.foto.FotoUtil
 import br.com.anunciaai.ui.theme.CorPlataforma
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun RevisaoScreen(
     itemId: Long,
@@ -179,8 +184,12 @@ fun RevisaoScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Revisar anúncio") },
-                navigationIcon = { TextButton(onClick = onVoltar) { Text("←") } }
+                title = { Text("Revisar anúncio", style = MaterialTheme.typography.titleLarge) },
+                navigationIcon = {
+                    IconButton(onClick = onVoltar) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Voltar")
+                    }
+                }
             )
         },
         bottomBar = { BarraInferior(Rotas.CAPTURA, onNavBottom) }
@@ -277,45 +286,74 @@ fun RevisaoScreen(
                         label = { Text("marcas de uso") }
                     )
                 }
-                TextButton(onClick = { gerarComIA() }, enabled = !gerando && fotos.isNotEmpty()) {
-                    Text(if (gerando) "Gerando..." else "Gerar com a IA")
+                // Ação principal: gerar com IA (botão tonal, não TextButton esquecido)
+                OutlinedButton(
+                    onClick = { gerarComIA() },
+                    enabled = !gerando && fotos.isNotEmpty(),
+                    modifier = Modifier.fillMaxWidth().height(48.dp),
+                    shape = RoundedCornerShape(14.dp)
+                ) {
+                    if (gerando) {
+                        CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                        Spacer(Modifier.width(10.dp))
+                        Text("Gerando anúncio...", style = MaterialTheme.typography.titleMedium)
+                    } else {
+                        Icon(Icons.Default.AutoAwesome, contentDescription = null, Modifier.size(18.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text("Gerar com a IA", style = MaterialTheme.typography.titleMedium)
+                    }
                 }
 
                 Spacer(Modifier.height(12.dp))
                 HorizontalDivider(color = MaterialTheme.colorScheme.outline)
                 Spacer(Modifier.height(12.dp))
-                Text("Onde publicar", style = MaterialTheme.typography.titleMedium)
+                Text(
+                    "Onde publicar",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
 
-                Spacer(Modifier.height(6.dp))
-                Plataforma.entries.forEach { plat ->
-                    val conectada = if (plat.precisaOAuth) conectadas.contains(plat.name) else true
-                    Row(
-                        Modifier.fillMaxWidth().padding(vertical = 2.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Checkbox(
-                            checked = marcadas.contains(plat),
-                            onCheckedChange = { on ->
-                                marcadas = if (on) marcadas + plat else marcadas - plat
-                            }
+                Spacer(Modifier.height(10.dp))
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Plataforma.entries.forEach { plat ->
+                        val conectada = if (plat.precisaOAuth) conectadas.contains(plat.name) else true
+                        val marcada = marcadas.contains(plat)
+                        FilterChip(
+                            selected = marcada,
+                            onClick = {
+                                marcadas = if (marcada) marcadas - plat else marcadas + plat
+                            },
+                            shape = CircleShape,
+                            leadingIcon = {
+                                Box(
+                                    Modifier
+                                        .padding(start = 8.dp)
+                                        .size(10.dp)
+                                        .background(
+                                            CorPlataforma[plat.name] ?: MaterialTheme.colorScheme.primary,
+                                            CircleShape
+                                        )
+                                )
+                            },
+                            label = { Text(plat.rotulo) }
                         )
-                        // indicador inline: dot da marca + nome
-                        Box(
-                            Modifier.size(10.dp).background(
-                                CorPlataforma[plat.name] ?: MaterialTheme.colorScheme.primary,
-                                CircleShape
-                            )
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Text(plat.rotulo, Modifier.weight(1f))
                         if (!conectada) {
-                            Text(
-                                "não conectada",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                            // chip desabilitado visualmente pela ausência de conexão
                         }
                     }
+                }
+                val naoConectadas = Plataforma.entries
+                    .filter { marcadas.contains(it) && (if (it.precisaOAuth) !conectadas.contains(it.name) else false) }
+                if (naoConectadas.isNotEmpty()) {
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        "Aviso: ${naoConectadas.joinToString { it.rotulo }} sem conexão — conecte na aba Conexões ou o anúncio vai falhar.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
 
                 erro?.let {
