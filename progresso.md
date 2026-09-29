@@ -70,6 +70,13 @@ Kotlin + Jetpack Compose · Room · Retrofit/OkHttp · WebView (`evaluateJavascr
 - (nada — todos os builds passaram)
 
 ## Feito (adicional, depois do build 1)
+- [x] 29/09 — **v5.0 PASSO 1 (BUILD 23) — rename VendeAi + audit do dashboard contra a spec:**
+  - **Rename visível**: app_name e top bar agora **VendeAi** (verificado no arsc + dex). Pacote segue `br.com.anunciaai` de propósito — trocar applicationId quebraria upgrade da assinatura e o deep link OAuth já registrado.
+  - **Itens recentes agora é scroll HORIZONTAL** (spec pedia; era vertical): LazyRow de cards 150dp com foto 110dp no topo, título, preço destaque e pilha de selos de plataforma.
+  - **Card de resumo com brilho GLOSSY**: faixa de luz branca (alpha 0.22→0) sobre o gradiente #00C896→#0A5C6E, cantos 20dp; "+ Novo item" virou FilledTonalButton dentro do card.
+  - **Vendas por plataforma lista TODAS as 6 marcas** (era só conectadas): badge quadrado da marca + valor + selo % com seta (verde #00A97A / vermelho #FF5470).
+  - FAB verde-menta "+" no canto, acima da bottom bar (único ponto de entrada) — mantido.
+  - **Verificado no binário**: versionCode 8 / v5.0, label 'VendeAi' no arsc, strings OK, nvapi- no dex, assinatura 5bb25361.
 - [x] 29/09 — **v4.1 (BUILD 22) — correções de bugs reais da v4.0 + nivelamento visual:**
   - **Bug OLX WebView (ERR_HTTP_RESPONSE_CODE_FAILURE)**: WebView agora usa **UA de Chrome Android real** (Pixel 7/Chrome 129 — o default com "; wv" é bloqueado por anti-bot), domStorage+database+cache OK, `setAcceptThirdPartyCookies(true)`, pré-visita ao Google (sessão de navegação "normal" antes da página de anúncio), `onReceivedError` só no main frame, e **tela de erro amigável** ("Não consegui abrir a plataforma" + "Tentar novamente" + aviso de bloqueio de automação) em vez do erro cru. Aplicado a login E publicação (OLX/FB/Enjoei/Shopee). Anti-duplicação de tentativas via tag (ids.xml novo).
   - **Bug "l ivros" (texto quebrado em L maiúsculo)**: causa raiz = fonte VARIÁVEL + variationSettings (bug de shaping no Android). Trocada por **Manrope em 5 pesos ESTÁTICOS** (regular/medium/semibold/bold/extrabold, ~97KB cada, baixados de repo fonte real). Variável antiga removida do APK (verificado: 5 TTFs estáticos, nenhum de 164KB).
