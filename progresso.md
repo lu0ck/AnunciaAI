@@ -70,6 +70,13 @@ Kotlin + Jetpack Compose · Room · Retrofit/OkHttp · WebView (`evaluateJavascr
 - (nada — todos os builds passaram)
 
 ## Feito (adicional, depois do build 1)
+- [x] 29/09 — **v5.2 ITEM 1 (BUILD 25) — Câmera Imersiva full-screen (CameraX in-app):**
+  - Trocada a câmera do SISTEMA (TakePicture) por **CameraX in-app**: preview live ocupando a tela toda (moldura tracejada e tela "Vender" de formulário REMOVIDAS).
+  - **4 cantoneiras brancas finas** (3dp, 36dp de comprimento, cantos arredondados) no centro como guia de enquadramento — Canvas custom.
+  - **Balão de diálogo branco** com cantos 16dp + seta triangular apontando pra baixo (pro botão de captura): "Fotografe o item" (negrito) / "A IA fará a avaliação e a precificação".
+  - Botão de captura 76dp (anel branco + centro escuro) disparando takePicture via gatilho hoisted; botão galeria circular translúcido; X pra fechar. Foto capturada → correção de rotação → análise da IA (fluxo v4 preservado).
+  - Deps novas: camera-core/camera2/lifecycle/view 1.4.0. APK cresceu 1,9→2,7MB (CameraX).
+  - **Verificado no binário**: versionCode 10 / v5.2, strings do balão OK, ProcessCameraProvider no dex, string antiga "Escolher da galeria" removida, nvapi- OK, assinatura 5bb25361.
 - [x] 29/09 — **v5.1 (BUILD 24): REVERSÃO DO RENAME — app volta a ser AnunciaAI.** Lucas desfez o equívoco ("não é pra mudar de nome, é pra continuar anunciaai"). Label strings.xml + top bar revertidos, verificado no arsc (zero resíduo de "VendeAi"). versionCode 9 / v5.1. NOTA: durante a entrega o SSD_Games_2 DESMONTOU sozinho DUAS VEZES (NTFS sda1 instável; sistema reiniciou antes) — remontado via `udisksctl mount -b /dev/sda1`, nada perdido. Se sumir de novo: remontar com o mesmo comando.
 - [x] 29/09 — **v5.0 PASSO 1 (BUILD 23) — rename VendeAi + audit do dashboard contra a spec:**
   - **Rename visível**: app_name e top bar agora **VendeAi** (verificado no arsc + dex). Pacote segue `br.com.anunciaai` de propósito — trocar applicationId quebraria upgrade da assinatura e o deep link OAuth já registrado.
