@@ -3,7 +3,7 @@
 > App Android de crosslisting: foto → IA (Qwen-VL Plus) → revisão → publicar em Mercado Livre / eBay / Shopee / OLX / Facebook Marketplace / Enjoei.
 > **Continuação:** novo chat com o nome "AnunciaAI" → dizer "continuar do progresso.md". Espec completa original: `~/.config/Hermes/composer-pastes/pasted_content_2026-09-26_19-00-46-478_e2a84b.txt`
 >
-> ⚠️ **ESTADO DO CHAT (medido no state.db em 28/09): 894 KB — 235% do limite de 380 KB.** 562 mensagens, 338 tool calls, 201 chamadas de API, 26,8M tokens de entrada acumulados. Pela convenção: **começar chat NOVO para o próximo trabalho**; este arquivo tem tudo que o novo chat precisa.
+> ⚠️ **ESTADO DO CHAT (medido no state.db em 30/09): 3.573 KB — 940% do limite de 380 KB.** 897 mensagens, 467 tool calls, 403 chamadas de API, 2,08M tokens de entrada. Pela convenção: **chat ENCERRADO — novo chat criado**; este arquivo tem tudo que o novo chat precisa.
 
 ## ⚠️ Convenção do chat (definida por Lucas em 26/09/2026)
 1. Limite do chat: **380 KB**. Avisar o usuário quando estiver chegando perto.
@@ -183,16 +183,28 @@ GRADLE_USER_HOME=$PWD/.gradle-home ANDROID_HOME=$PWD/android-sdk JAVA_HOME=$PWD/
 GRADLE_USER_HOME=$PWD/.gradle-home ANDROID_HOME=$PWD/android-sdk JAVA_HOME=$PWD/jdk-17.0.20.1+1 ./gradle-8.10.2/bin/gradle assembleRelease --console=plain
 ```
 
-## Planejado (próximos passos, precisa do celular/chaves)
-- [x] ~~APK 2.0 NÃO TEM CHAVE DE IA~~ **RESOLVIDO 29/09** — chave NVIDIA no local.properties, BUILD 18 com `nvapi-` no dex (verificado). Verificação E2E real da IA passou (JSON válido).
-- [ ] Instalar `AnunciaAI-2.1.apk` no celular (substitui a v1/v2 — mesma assinatura) e testar o fluxo completo. **Ao abrir: tem que aparecer "v2.1" no topo da lista e "✓ IA ativa: nvidia" na aba Conexões — senão o APK velho ficou instalado.**
-- [ ] Teste real: IA multi-fotos (NVIDIA ok), ML OAuth (precisa app no DevCenter), OLX WebView
-- [ ] Teste real das Mensagens ML (precisa OAuth + anúncio com perguntas)
+## ⚠️ ESTADO ATUAL (30/09 — ler isto primeiro no chat novo)
+- **APK atual: `AnunciaAI-8.0.apk` (versionCode 16, v8.0, 24MB — ML Kit embutido)** na raiz do projeto. Entregue via servidor LAN :8899 (derrubado após download). **Ainda NÃO testado no celular** — o Lucas baixou mas não reportou o teste da v8.0.
+- Git: tudo commitado e pushado até `f8809cd`. Repo: github.com/lu0ck/AnunciaAI (PÚBLICA).
+- IA: NVIDIA NIM (llama-3.2-11b-vision) FUNCIONAL — chave em local.properties, testada E2E (JSON no contrato novo: titulo/descricao/categoria_sugerida com taxonomia ' > '/preco_sugerido/preco_comparativo_mercado/condicao estrita em 4 valores).
+- Design atual: tema escuro #12151A/#1B1F26, destaque única #00C896, Manrope estática (5 pesos), badges quadrados com cor de marca, dock BottomAppBar+NotchShape com FAB central, neon glassmorphism (brilhoNeon), Vitrine grid 2 colunas com entrada escalonada, câmera imersiva CameraX com scanner EAN (ML Kit).
+- **Convite ao chat novo**: este chat atingiu 3.573 KB (940% do limite 380 KB) — LEVE EM CONTA nas respostas; manter respostas curtas, poupar contexto.
+
+## Continuação (chat novo → "continuar do progresso.md")
+Novo chat com nome "AnunciaAI" → dizer "continuar do progresso.md". Estado completo acima; comandos de build abaixo.
+
+## Planejado (próximas tarefas, em ordem)
+- [ ] **TESTAR v8.0 no celular** (prioridade máxima — tudo abaixo depende de bugs reais): FAB encaixa no entalhe do dock? Vitrine com animação de entrada? Análise sem sobreposição + checks animados? Scanner EAN lê código de barras? Câmera imersiva funciona no aparelho?
+- [ ] Corrigir o que vier do teste (histórico de crashes da v6/v6.1 mostra que câmera/dock precisam de prova real)
+- [ ] Credenciais ML: app no DevCenter (developers.mercadolivre.com.br) → ANUNCIAAI_ML_CLIENT_ID/SECRET no local.properties + redirect br.com.anunciaai://oauth/ml → rebuild → testar OAuth + publicação via API + Mensagens ML
+- [ ] Testar OLX WebView de novo (v8.0 tem onReceivedHttpError + tela amigável + UA Chrome — ver se a OLX agora deixa logar/publicar)
+- [ ] Considerar APK thin do ML Kit (24MB → ~3MB; exige Play Services) se o tamanho incomodar
+- [ ] (opcional) eBay Production keys; Shopee Open Platform (aprovação de parceiro — fora do nosso controle)
 
 ## Não terminado / Pendente usuário
-- IA: RESOLVIDO 27/09 — NVIDIA NIM (llama-3.2-11b-vision, 3.8s) funcionando com a chave do Lucas em local.properties
 - App criado no https://developers.mercadolivre.com.br/devcenter → `ANUNCIAAI_ML_CLIENT_ID` + `ANUNCIAAI_ML_CLIENT_SECRET` (redirect: br.com.anunciaai://oauth/ml; se recusar deep link, avisar o Hermes p/ ajustar o app)
   - (opcional) eBay Production keys → `ANUNCIAAI_EBAY_CLIENT_ID` + `ANUNCIAAI_EBAY_CLIENT_SECRET`
 - Gemini: chave "AQ." do Lucas NÃO serve no AI Studio (precisa AIza... — criar nova em aistudio.google.com/apikey se quiser 2º provedor)
 - Shopee: aprovação de parceiro na Open Platform (fora do nosso controle) — v1 cai no WebView como fallback
 - Qwen DashScope: Lucas pagou mas desistiu (site pede dados pessoais) — não usar
+- GeminiService/QwenVLService NÃO implementam gerarAnuncioComEan (só NvidiaVLService) — se trocar de provedor, implementar lá também (herdam o default que ignora o EAN)
