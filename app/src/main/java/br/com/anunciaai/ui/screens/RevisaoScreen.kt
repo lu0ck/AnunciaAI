@@ -62,7 +62,7 @@ fun RevisaoScreen(
     var descricao by remember { mutableStateOf(TextFieldValue("")) }
     var categoria by remember { mutableStateOf(TextFieldValue("")) }
     var preco by remember { mutableStateOf(TextFieldValue("")) }
-    var condicao by remember { mutableStateOf("usado - bom estado") }
+    var condicao by remember { mutableStateOf("bom estado") }
     var marcadas by remember { mutableStateOf(setOf(Plataforma.MERCADO_LIVRE, Plataforma.OLX)) }
     var gerando by remember { mutableStateOf(false) }
     var publicando by remember { mutableStateOf(false) }
@@ -73,8 +73,9 @@ fun RevisaoScreen(
         titulo = TextFieldValue(s.titulo)
         descricao = TextFieldValue(s.descricao)
         categoria = TextFieldValue(s.categoria_sugerida)
-        preco = TextFieldValue(if (s.precoSugeridoReais > 0) "%.2f".format(s.precoSugeridoReais) else "")
-        if (s.condicao.isNotBlank()) condicao = s.condicao
+        preco = TextFieldValue(if (s.melhorPreco > 0) "%.2f".format(s.melhorPreco) else "")
+        // v7: a IA devolve um dos 4 valores exatos — o chip certo já vem marcado
+        condicao = s.condicaoNormalizada
     }
 
     fun gerarComIA() {
@@ -288,24 +289,28 @@ fun RevisaoScreen(
                     )
                 }
                 Spacer(Modifier.height(12.dp))
-                // v4.1 (bug do chip vertical): FlowRow — chips de condição quebram por PALAVRA,
-                // nunca por caractere, e o tamanho se ajusta ao conteúdo
+                // v7 (bug do chip vertical): FlowRow — chips nos 4 VALORES EXATOS da IA
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    listOf(
-                        "novo" to "novo",
-                        "usado - como novo" to "como novo",
-                        "usado - bom estado" to "bom estado",
-                        "usado - com marcas de uso" to "marcas de uso"
-                    ).forEach { (valor, rotulo) ->
+                    SugestaoIA.CONDICOES.forEach { valor ->
                         FilterChip(
                             selected = condicao == valor,
                             onClick = { condicao = valor },
-                            label = { Text(rotulo) }
+                            label = { Text(valor) }
                         )
                     }
+                }
+                // v7: preço comparativo do mercado (quando a IA devolve)
+                val comparativo = item?.precoComparativoMercado ?: 0.0
+                if (comparativo > 0) {
+                    Spacer(Modifier.height(6.dp))
+                    Text(
+                        "Preço médio no mercado: R$ ${"%.2f".format(comparativo)}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
                 // Ação principal: sólida, cor de destaque única
                 Button(

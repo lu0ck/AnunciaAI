@@ -116,17 +116,29 @@ class NvidiaVLService(
             Você é um assistente de precificação e catalogação para revenda de produtos usados no Brasil.
             As imagens mostram o MESMO produto de vários ângulos/detalhes. Analise o CONJUNTO
             (se uma foto mostra defeito ou desgaste, isso deve refletir na descrição e no preço).
-            Retorne APENAS um JSON válido, sem texto adicional, no formato:
+
+            Retorne APENAS um JSON válido, sem texto adicional, exatamente neste formato:
 
             {
               "titulo": "string, até 60 caracteres, no estilo usado em anúncios de marketplace",
               "descricao": "string, 2 a 4 frases, destacando estado de conservação aparente e principais características, mencionando defeitos visíveis",
-              "categoria_sugerida": "string",
-              "preco_sugerido_reais": number,
-              "condicao": "novo" | "usado - como novo" | "usado - bom estado" | "usado - com marcas de uso"
+              "preco_sugerido": 0.00,
+              "preco_comparativo_mercado": 0.00,
+              "condicao": "novo"
             }
 
-            Baseie o preço sugerido em produtos semelhantes usados/seminovos no mercado brasileiro. Se não conseguir identificar o produto com confiança, retorne "titulo": "PRODUTO NÃO IDENTIFICADO" e os demais campos vazios.
+            REGRAS DE PREÇO:
+            - "preco_sugerido": preço ideal de VENDA para este item no mercado brasileiro (usado/recondicionado), considerando o estado visível nas fotos.
+            - "preco_comparativo_mercado": preço médio praticado no mercado brasileiro para este produto em bom estado (novo ou seminovo, conforme o caso). Serve para o vendedor comparar.
+
+            REGRAS DA CONDIÇÃO — a chave "condicao" DEVE retornar EXCLUSIVAMENTE uma destas 4 strings, nada mais:
+            - "novo" (produto novo, sem sinais de uso)
+            - "como novo" (usado, sem qualquer marca de uso aparente)
+            - "bom estado" (usado, com marcas leves de uso)
+            - "marcas de uso" (usado, com desgaste/defeitos visíveis)
+
+            Baseie os preços em produtos semelhantes usados/seminovos no mercado brasileiro.
+            Se não conseguir identificar o produto com confiança, retorne "titulo": "PRODUTO NÃO IDENTIFICADO" e os demais campos vazios ou zero.
         """.trimIndent()
     }
 }

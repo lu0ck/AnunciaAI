@@ -70,6 +70,13 @@ Kotlin + Jetpack Compose · Room · Retrofit/OkHttp · WebView (`evaluateJavascr
 - (nada — todos os builds passaram)
 
 ## Feito (adicional, depois do build 1)
+- [x] 29/09 — **v7.0 (BUILD 30) — correção da BASE: crash, duplicações e IA comparativa:**
+  - **CAUSA DO CRASH DO PERFIL encontrada**: scroll aninhado — PerfilScreen tem `verticalScroll` e a ConexoesScreen embutida TAMBÉM tinha. Scroll vertical dentro de scroll vertical = exceção imediata no Compose. Corrigido: ConexoesScreen `embutida` rola pelo pai.
+  - **Botão "+ Novo item" do TOPO removido** do card de resumo (conflitava com FAB central e "Explorar itens"). Entrada única = FAB central do Scaffold (`FabPosition.Center`) — verificado no dex: string "Novo item" sumiu.
+  - **Vitrine confirmada**: já era `LazyVerticalGrid(GridCells.Fixed(2))` com contentPadding 16dp e arrangement 12dp (atende o item 2 sem mudança).
+  - **IA v7 — contrato novo**: prompt reescrito exigindo JSON `{titulo, descricao, preco_sugerido, preco_comparativo_mercado, condicao}` com condição ESTRITAMENTE em "novo"/"como novo"/"bom estado"/"marcas de uso". SugestaoIA ganhou `precoSugerido` + `precoComparativoMercado` + `condicaoNormalizada` (normalizador tolerante) + `melhorPreco`. Item (Room) ganhou `precoComparativoMercado` (DB v3, destructive). AnaliseScreen salva os dois preços; Revisão mostra "Preço médio no mercado: R$ X" e o CHIP DE CONDIÇÃO JÁ VEM MARCADO com o valor exato da IA (4 chips nos valores exatos).
+  - **TESTE E2E REAL**: novo prompt enviado à API NVIDIA com foto → HTTP 200 em 7,1s, JSON no contrato exato, condicao="novo" dentro das 4 permitidas, preco_comparativo presente.
+  - **Verificado**: versionCode 15 / v7.0; strings v7 no dex; nvapi- OK; assinatura 5bb25361. APK: AnunciaAI-7.0.apk.
 - [x] 29/09 — **v6.1 (BUILD 29) — CORREÇÃO DO CRASH v6.0 + estabilidade:**
   - **CAUSA DO CRASH**: o dock custom da v6.0 usava Canvas/Path/arcTo manual dentro de Box com FAB posicionado à mão — sobreposição quebrada no Início (2 FABs) e geometria frágil. REMOVIDO por completo.
   - **PASSO 1**: FAB antigo do canto inferior direito REMOVIDO do Início (era duplicado com o central — erro meu da v6.0). Único FAB do app = "Vender" central.

@@ -181,18 +181,8 @@ fun ListaItensScreen(
                                 color = Color(0xFF04150F).copy(alpha = 0.7f)
                             )
                         }
-                        FilledTonalButton(
-                            onClick = onNovoItem,
-                            shape = CircleShape,
-                            colors = ButtonDefaults.filledTonalButtonColors(
-                                containerColor = Color(0xFF04150F).copy(alpha = 0.3f),
-                                contentColor = Color.White
-                            )
-                        ) {
-                            Icon(Icons.Default.Add, contentDescription = null, Modifier.size(18.dp))
-                            Spacer(Modifier.width(4.dp))
-                            Text("Novo item", style = MaterialTheme.typography.labelLarge)
-                        }
+                        // v7: botão "+ Novo item" do topo REMOVIDO — o único ponto
+                        // de entrada é o FAB central do Scaffold.
                     }
                 }
             }

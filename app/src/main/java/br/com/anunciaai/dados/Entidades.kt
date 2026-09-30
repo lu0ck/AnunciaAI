@@ -13,6 +13,7 @@ data class Item(
     val categoria: String,
     val precoSugerido: Double,
     val precoFinal: Double,
+    val precoComparativoMercado: Double = 0.0,
     val dataCriacao: Long = System.currentTimeMillis()
 )
 

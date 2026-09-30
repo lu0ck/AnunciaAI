@@ -95,7 +95,8 @@ fun AnaliseScreen(
                             titulo = s.titulo,
                             descricao = s.descricao,
                             categoria = s.categoria_sugerida,
-                            precoSugerido = s.precoSugeridoReais
+                            precoSugerido = s.melhorPreco,
+                            precoComparativoMercado = s.precoComparativoMercado
                         )
                     )
                 }

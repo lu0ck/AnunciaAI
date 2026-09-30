@@ -45,7 +45,9 @@ fun ConexoesScreen(embutida: Boolean = false) {
 
     val conteudo: @Composable () -> Unit = {
         Column(
-            Modifier.padding(horizontal = 16.dp).verticalScroll(rememberScrollState())
+            // v7: SEM verticalScroll aqui quando embutida (scroll dentro de scroll
+            // = crash no Compose). Quem rola é o pai (PerfilScreen).
+            Modifier.padding(horizontal = 16.dp).then(if (embutida) Modifier else Modifier.verticalScroll(rememberScrollState()))
         ) {
             msg?.let {
                 Text(
