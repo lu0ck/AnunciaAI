@@ -37,6 +37,7 @@ import br.com.anunciaai.ui.Rotas
 import br.com.anunciaai.ui.foto.FotoPrimeira
 import br.com.anunciaai.ui.theme.Destaque
 import br.com.anunciaai.ui.theme.Petroleo
+import br.com.anunciaai.ui.theme.brilhoNeon
 
 /**
  * Início (PASSO 1 — dashboard VendeAi):
@@ -134,11 +135,12 @@ fun ListaItensScreen(
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            // ── Card de resumo: gradiente + brilho glossy ──
+            // ── Card de resumo: gradiente + brilho glossy + GLOW NEON (PILAR 2) ──
             item {
                 Box(
                     Modifier
                         .fillMaxWidth()
+                        .brilhoNeon() // PILAR 2: glow verde-menta 10% por trás
                         .clip(RoundedCornerShape(20.dp))
                         .background(Brush.linearGradient(listOf(Destaque, Petroleo)))
                 ) {

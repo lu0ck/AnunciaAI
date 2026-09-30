@@ -1,5 +1,9 @@
 package br.com.anunciaai.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -25,6 +29,8 @@ import br.com.anunciaai.ui.IconePlataforma
 import br.com.anunciaai.ui.Rotas
 import br.com.anunciaai.ui.foto.FotoPrimeira
 import br.com.anunciaai.ui.theme.Destaque
+import br.com.anunciaai.ui.theme.brilhoNeon
+import kotlinx.coroutines.delay
 
 /**
  * Vitrine (v6): grid 2 colunas de TODOS os itens — a "loja" completa.
@@ -78,13 +84,29 @@ fun VitrineScreen(
                 modifier = Modifier.padding(pad).fillMaxSize()
             ) {
                 items(ordenados, key = { it.id }) { item ->
+                    // PILAR 2: itens surgem um a um (baixo→cima + fade), escalonados
+                    var visivel by remember { mutableStateOf(false) }
+                    LaunchedEffect(item.id) {
+                        delay((ordenados.indexOfFirst { it.id == item.id }.coerceAtMost(8) * 60).toLong())
+                        visivel = true
+                    }
+                    AnimatedVisibility(
+                        visible = visivel,
+                        enter = slideInVertically(
+                            initialOffsetY = { it / 3 },
+                            animationSpec = tween(350)
+                        ) + fadeIn(tween(350))
+                    ) {
                     Card(
                         onClick = { onAbrirItem(item.id) },
-                        shape = RoundedCornerShape(16.dp),
+                        shape = RoundedCornerShape(20.dp), // PILAR 2: cantos 20dp
                         colors = CardDefaults.cardColors(
                             containerColor = MaterialTheme.colorScheme.surfaceContainer
                         ),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .brilhoNeon() // PILAR 2: glow verde-menta 10% atrás do card
                     ) {
                         Column {
                             Box(
@@ -119,6 +141,7 @@ fun VitrineScreen(
                             }
                         }
                     }
+                    } // fim AnimatedVisibility
                 }
             }
         }

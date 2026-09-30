@@ -14,8 +14,8 @@ android {
         applicationId "br.com.anunciaai"
         minSdk 26
         targetSdk 35
-        versionCode 15
-        versionName "7.0"
+        versionCode 16
+        versionName "8.0"
 
         // Chaves OAuth/IA: lidas do local.properties (não versionado), vazias por padrão.
         // Preencha: ANUNCIAAI_ML_CLIENT_ID / ANUNCIAAI_ML_CLIENT_SECRET /
@@ -109,6 +109,9 @@ dependencies {
     implementation 'androidx.camera:camera-camera2:1.4.0'
     implementation 'androidx.camera:camera-lifecycle:1.4.0'
     implementation 'androidx.camera:camera-view:1.4.0'
+
+    // PILAR 4: Scanner de código de barras (ML Kit, modelo embutido)
+    implementation 'com.google.mlkit:barcode-scanning:17.3.0'
 
     // Cores
     implementation 'androidx.core:core-ktx:1.15.0'

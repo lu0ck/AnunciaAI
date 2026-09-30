@@ -6,6 +6,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview as CameraPreview
@@ -27,6 +28,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -45,6 +47,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import br.com.anunciaai.AnunciaAIApp
 import br.com.anunciaai.ui.foto.FotoUtil
+import br.com.anunciaai.ui.theme.Destaque
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -59,7 +62,7 @@ import java.io.File
 @Composable
 fun NovaCapturaScreen(
     onVoltar: () -> Unit,
-    onItemCriado: (Long) -> Unit,
+    onItemCriado: (Long, String?) -> Unit,
     onNavBottom: (String) -> Unit = {}
 ) {
     val contexto = LocalContext.current
@@ -75,6 +78,17 @@ fun NovaCapturaScreen(
     var erro by remember { mutableStateOf<String?>(null) }
     // gatilho de captura registrado pela câmera (hoisted state)
     var gatilhoCaptura by remember { mutableStateOf<(() -> Unit)?>(null) }
+    // PILAR 4: scanner de código de barras (ML Kit) — cliente EAN-13
+    var escanerAtivo by remember { mutableStateOf(false) }
+    var eanLido by remember { mutableStateOf<String?>(null) }
+    val analisadorEan = remember {
+        com.google.mlkit.vision.barcode.BarcodeScanning.getClient(
+            com.google.mlkit.vision.barcode.BarcodeScannerOptions.Builder()
+                .setBarcodeFormats(com.google.mlkit.vision.barcode.common.Barcode.FORMAT_EAN_13)
+                .build()
+        )
+    }
+    DisposableEffect(Unit) { onDispose { analisadorEan.close() } }
 
     // cria o item vazio uma vez; fotos entram na tabela FotoItem
     var itemIdAtual by remember { mutableStateOf<Long?>(null) }
@@ -99,7 +113,7 @@ fun NovaCapturaScreen(
         itemAtualOuNovo { id ->
             escopo.launch {
                 val ok = app.repositorio.adicionarFoto(id, uriCopiada)
-                if (ok) onItemCriado(id)
+                if (ok) onItemCriado(id, eanLido)
                 else erro = "Limite de 10 fotos por item."
             }
         }
@@ -126,7 +140,7 @@ fun NovaCapturaScreen(
                         val copiada = FotoUtil.copiarParaInterno(contexto, uri)
                         if (copiada != null && app.repositorio.adicionarFoto(id, copiada)) copiou = true
                     }
-                    if (copiou) onItemCriado(id)
+                    if (copiou) onItemCriado(id, eanLido)
                     else erro = "Não consegui copiar as fotos."
                 }
             }
@@ -145,7 +159,15 @@ fun NovaCapturaScreen(
                     if (copiada != null) adicionarFoto(copiada)
                     else erro = "Não consegui salvar a foto."
                 },
-                onErro = { erro = it }
+                onErro = { erro = it },
+                escanerAtivo = escanerAtivo,
+                onEanLido = { ean ->
+                    if (eanLido == null && escanerAtivo) {
+                        eanLido = ean
+                        escanerAtivo = false
+                    }
+                },
+                analisadorEan = analisadorEan
             )
         } else {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -167,6 +189,26 @@ fun NovaCapturaScreen(
                 .background(Color.Black.copy(alpha = 0.4f), CircleShape)
         ) {
             Icon(Icons.Default.Close, "Fechar", tint = Color.White)
+        }
+
+        // PILAR 4: EAN lido — chip verde no topo, acima do balão
+        eanLido?.let { ean ->
+            Surface(
+                color = Destaque.copy(alpha = 0.92f),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier
+                    .statusBarsPadding()
+                    .padding(top = 8.dp)
+                    .align(Alignment.TopCenter)
+            ) {
+                Text(
+                    "EAN $ean ✓",
+                    Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                    color = Color(0xFF06231B),
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
 
         // Cantoneiras de enquadramento (centro)
@@ -200,6 +242,23 @@ fun NovaCapturaScreen(
                 ) {
                     Icon(Icons.Default.Image, "Galeria", tint = Color.White,
                         modifier = Modifier.size(22.dp))
+                }
+                // PILAR 4: botão do scanner de código de barras (EAN)
+                IconButton(
+                    onClick = { escanerAtivo = !escanerAtivo },
+                    modifier = Modifier
+                        .size(52.dp)
+                        .background(
+                            if (escanerAtivo) Destaque else Color.Black.copy(alpha = 0.4f),
+                            CircleShape
+                        )
+                ) {
+                    Icon(
+                        Icons.Default.QrCodeScanner,
+                        contentDescription = "Ler Código de Barras (EAN)",
+                        tint = if (escanerAtivo) Color(0xFF06231B) else Color.White,
+                        modifier = Modifier.size(22.dp)
+                    )
                 }
                 // Botão de captura grande — dispara o takePicture da CameraX
                 Box(
@@ -241,41 +300,71 @@ fun NovaCapturaScreen(
     }
 }
 
-/** Preview CameraX full-screen; registra o gatilho de captura no estado do pai. */
+/** Preview CameraX full-screen; registra o gatilho de captura no estado do pai.
+ *  PILAR 4: quando escanerAtivo, analisa os frames com ML Kit (EAN-13). */
 @Composable
 private fun CameraImersiva(
     onGatilhoPronto: (() -> Unit) -> Unit,
     onFotoTirada: (File) -> Unit,
-    onErro: (String) -> Unit
+    onErro: (String) -> Unit,
+    escanerAtivo: Boolean = false,
+    onEanLido: (String) -> Unit = {},
+    analisadorEan: com.google.mlkit.vision.barcode.BarcodeScanner? = null
 ) {
     val contexto = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val imageCapture = remember { ImageCapture.Builder().build() }
+    val analiseEan = remember { ImageAnalysis.Builder().build() }
+
+    // PILAR 4: (re)bind da câmera — roda no factory e a cada mudança do scanner
+    fun reconstruirBind(view: PreviewView) {
+        val providerFuture = ProcessCameraProvider.getInstance(view.context)
+        providerFuture.addListener({
+            val provider = providerFuture.get()
+            val preview = CameraPreview.Builder()
+                .build()
+                .also { it.setSurfaceProvider(view.surfaceProvider) }
+            try {
+                provider.unbindAll()
+                val casos = mutableListOf<androidx.camera.core.UseCase>(preview, imageCapture)
+                if (escanerAtivo && analisadorEan != null) {
+                    analiseEan.setAnalyzer(ContextCompat.getMainExecutor(view.context)) { proxy ->
+                        @androidx.annotation.OptIn(androidx.camera.core.ExperimentalGetImage::class)
+                        val media = proxy.image
+                        if (media != null) {
+                            val entrada = com.google.mlkit.vision.common.InputImage.fromMediaImage(
+                                media, proxy.imageInfo.rotationDegrees
+                            )
+                            analisadorEan.process(entrada)
+                                .addOnSuccessListener { codigos ->
+                                    codigos.firstOrNull()?.rawValue?.let { ean ->
+                                        onEanLido(ean)
+                                    }
+                                }
+                                .addOnCompleteListener { proxy.close() }
+                        } else proxy.close()
+                    }
+                    casos.add(analiseEan)
+                }
+                provider.bindToLifecycle(
+                    lifecycleOwner, CameraSelector.DEFAULT_BACK_CAMERA,
+                    *casos.toTypedArray()
+                )
+            } catch (e: Exception) {
+                onErro("Câmera indisponível: ${e.message}")
+            }
+        }, ContextCompat.getMainExecutor(view.context))
+    }
 
     AndroidView(
         modifier = Modifier.fillMaxSize(),
         factory = { ctx ->
-            val previewView = PreviewView(ctx).apply {
+            PreviewView(ctx).apply {
                 scaleType = PreviewView.ScaleType.FILL_CENTER
             }
-            val providerFuture = ProcessCameraProvider.getInstance(ctx)
-            providerFuture.addListener({
-                val provider = providerFuture.get()
-                val preview = CameraPreview.Builder()
-                    .build()
-                    .also { it.setSurfaceProvider(previewView.surfaceProvider) }
-                try {
-                    provider.unbindAll()
-                    provider.bindToLifecycle(
-                        lifecycleOwner, CameraSelector.DEFAULT_BACK_CAMERA,
-                        preview, imageCapture
-                    )
-                } catch (e: Exception) {
-                    onErro("Câmera indisponível: ${e.message}")
-                }
-            }, ContextCompat.getMainExecutor(ctx))
-            previewView
-        }
+        },
+        // PILAR 4: re-bind quando o scanner liga/desliga (update roda na recomposição)
+        update = { view -> reconstruirBind(view) }
     )
 
     DisposableEffect(Unit) {

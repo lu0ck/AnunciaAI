@@ -7,6 +7,7 @@ import android.view.View
 import android.webkit.CookieManager
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceError
+import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -117,10 +118,20 @@ class LoginWebViewActivity : ComponentActivity() {
                                         override fun onPageStarted(view: WebView, url: String, favicon: Bitmap?) {
                                             erro = null
                                         }
+                                        // PILAR 5: captura HTTP de erro (ex.: 403 da OLX anti-bot)
+                                        override fun onReceivedHttpError(
+                                            view: WebView,
+                                            request: WebResourceRequest,
+                                            errorResponse: WebResourceResponse
+                                        ) {
+                                            if (request.isForMainFrame) {
+                                                erro = "A plataforma respondeu HTTP ${errorResponse.statusCode}" +
+                                                    " — pode estar bloqueando automação."
+                                            }
+                                        }
                                         override fun onReceivedError(
                                             view: WebView, request: WebResourceRequest, error: WebResourceError
                                         ) {
-                                            // só falha do documento principal derruba a tela (recursos secundários não)
                                             if (request.isForMainFrame) {
                                                 erro = "A página não carregou (${error.description})"
                                             }
@@ -178,6 +189,17 @@ class LoginWebViewActivity : ComponentActivity() {
                                     if (erro == null) {
                                         status = "Preenchendo o anúncio..."
                                         agendarTentativas(view, app, pedido, { tentativas = it }, { status = it })
+                                    }
+                                }
+                                // PILAR 5: HTTP de erro no main frame (anti-bot da OLX)
+                                override fun onReceivedHttpError(
+                                    view: WebView,
+                                    request: WebResourceRequest,
+                                    errorResponse: WebResourceResponse
+                                ) {
+                                    if (request.isForMainFrame) {
+                                        erro = "A plataforma respondeu HTTP ${errorResponse.statusCode}" +
+                                            " — pode estar bloqueando automação."
                                     }
                                 }
                                 override fun onReceivedError(

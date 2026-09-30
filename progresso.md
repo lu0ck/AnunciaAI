@@ -70,6 +70,13 @@ Kotlin + Jetpack Compose · Room · Retrofit/OkHttp · WebView (`evaluateJavascr
 - (nada — todos os builds passaram)
 
 ## Feito (adicional, depois do build 1)
+- [x] 30/09 — **v8.0 (BUILD 31) — SUPER PROMPT: 5 PILARES implementados:**
+  - **PILAR 1 (Dock premium)**: BottomAppBar oficial com **NotchShape** — Shape custom (createOutline, sem Canvas flutuante) que recorta entalhe circular central via clip(30dp); FAB ancorado pelo Scaffold `FabPosition.Center` encaixa no círculo. Ícones com animateFloatAsState: ativo cresce **15%** (spring bouncy) + cor 300ms.
+  - **PILAR 2 (Neon Glassmorphism)**: novo modificador `brilhoNeon()` — glow radial verde-menta **10% de opacidade** por trás dos cards (Home no card de resumo, Vitrine em todos) + `fundoGradienteEscuro`. Cards **20dp** de raio. Vitrine: itens surgem **um a um** com AnimatedVisibility (slideInVertically + fadeIn, stagger 60ms/item).
+  - **PILAR 3 (fim das sobreposições)**: AnaliseScreen reescrita — Column `spacedBy(16.dp)` SEM sobreposição; cada card surge com spring (slideInVertically+fadeIn) e **check verde animado** (scale spring 0→1). Prompt com **taxonomia exata** ("Eletrônicos > Hardware > Periféricos > Mouses", separador ' > ', 4 níveis, taxonomia ML/OLX).
+  - **PILAR 4 (Scanner EAN ML Kit)**: dep `barcode-scanning:17.3.0` (bundled). Botão QrCodeScanner junto à câmera liga/desliga `ImageAnalysis` (re-bind via AndroidView.update); ao ler EAN-13 mostra chip verde "EAN ✓", e o código viaja pela rota `analise/{itemId}?ean=...` até a IA: novo método `ServicoDeIA.gerarAnuncioComEan()` + PROMPT_EAN (modelo EXATO do fabricante, temperature 0.2). APK 2,7→24MB (modelo ML Kit embutido).
+  - **PILAR 5 (HTTP error)**: `onReceivedHttpError` capturado no WebView (login E publicação) — HTTP 403/anti-bot da OLX agora mostra a tela amigável "A plataforma respondeu HTTP NNN — pode estar bloqueando automação" com Tentar novamente (UA Chrome real já estava da v4.1).
+  - **Verificado**: versionCode 16 / v8.0; strings dos pilares no dex; 4 entradas mlkit no APK; nvapi- OK; assinatura 5bb25361. APK: AnunciaAI-8.0.apk (24MB).
 - [x] 29/09 — **v7.0 (BUILD 30) — correção da BASE: crash, duplicações e IA comparativa:**
   - **CAUSA DO CRASH DO PERFIL encontrada**: scroll aninhado — PerfilScreen tem `verticalScroll` e a ConexoesScreen embutida TAMBÉM tinha. Scroll vertical dentro de scroll vertical = exceção imediata no Compose. Corrigido: ConexoesScreen `embutida` rola pelo pai.
   - **Botão "+ Novo item" do TOPO removido** do card de resumo (conflitava com FAB central e "Explorar itens"). Entrada única = FAB central do Scaffold (`FabPosition.Center`) — verificado no dex: string "Novo item" sumiu.

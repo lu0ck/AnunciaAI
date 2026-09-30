@@ -28,12 +28,13 @@ object Rotas {
     const val VITRINE = "vitrine"
     const val PERFIL = "perfil"
     const val MENSAGENS = "mensagens"
-    const val ANALISE = "analise/{itemId}"
+    const val ANALISE = "analise/{itemId}?ean={ean}"
     const val REVISAO = "revisao/{itemId}"
     const val STATUS = "status/{itemId}"
     const val DETALHE = "detalhe/{itemId}"
 
-    fun analise(itemId: Long) = "analise/$itemId"
+    fun analise(itemId: Long, ean: String? = null) =
+        "analise/$itemId" + (if (!ean.isNullOrBlank()) "?ean=$ean" else "")
     fun revisao(itemId: Long) = "revisao/$itemId"
     fun status(itemId: Long) = "status/$itemId"
     fun detalhe(itemId: Long) = "detalhe/$itemId"
@@ -87,9 +88,9 @@ fun AnunciaAINavGraph() {
         composable(Rotas.CAPTURA) {
             NovaCapturaScreen(
                 onVoltar = { nav.popBackStack() },
-                onItemCriado = { itemId ->
-                    // v4: fotos → tela de análise com pilha de cards → revisão
-                    nav.navigate(Rotas.analise(itemId)) {
+                onItemCriado = { itemId, ean ->
+                    // PILAR 4: EAN lido vai junto pra análise (IA usa o código exato)
+                    nav.navigate(Rotas.analise(itemId, ean)) {
                         popUpTo(Rotas.CAPTURA) { inclusive = true }
                     }
                 },
@@ -98,11 +99,20 @@ fun AnunciaAINavGraph() {
         }
         composable(
             Rotas.ANALISE,
-            arguments = listOf(navArgument("itemId") { type = NavType.LongType })
+            arguments = listOf(
+                navArgument("itemId") { type = NavType.LongType },
+                navArgument("ean") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
         ) { entrada ->
             val itemId = entrada.arguments?.getLong("itemId") ?: 0L
+            val ean = entrada.arguments?.getString("ean")
             AnaliseScreen(
                 itemId = itemId,
+                ean = ean,
                 onVerAnuncio = { id ->
                     nav.navigate(Rotas.revisao(id)) {
                         popUpTo(Rotas.CAPTURA) { inclusive = true }
