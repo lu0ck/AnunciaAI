@@ -15,9 +15,16 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         // v4.1: statusbar e navbar SEMPRE escuras (o app é escuro por design;
         // o default herdava o tema do sistema e deixava o topo claro em "Analisando fotos")
+        // v11: app CLARO — statusbar clara com ícones escuros
         enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.dark(CorFundo.toArgb()),
-            navigationBarStyle = SystemBarStyle.dark(CorFundo.toArgb())
+            statusBarStyle = SystemBarStyle.light(
+                scrim = CorFundo.toArgb(),
+                darkScrim = br.com.anunciaai.ui.theme.CorTexto.toArgb()
+            ),
+            navigationBarStyle = SystemBarStyle.light(
+                scrim = CorFundo.toArgb(),
+                darkScrim = br.com.anunciaai.ui.theme.CorTexto.toArgb()
+            )
         )
         setContent {
             AnunciaAITheme {

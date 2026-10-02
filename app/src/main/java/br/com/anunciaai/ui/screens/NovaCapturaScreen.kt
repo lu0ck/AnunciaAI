@@ -439,7 +439,7 @@ private fun BalaoDica() {
                     "Fotografe o item",
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF0A0E1A)
+                    color = Color(0xFF17171F)
                 )
                 Text(
                     "A IA fará a avaliação e a precificação",

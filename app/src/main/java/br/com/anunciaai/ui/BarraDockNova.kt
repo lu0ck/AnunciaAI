@@ -10,7 +10,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ChatBubbleOutline
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Home
@@ -28,51 +30,89 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import br.com.anunciaai.ui.theme.CorSuperficie
+import br.com.anunciaai.ui.screens.EstadoInbox
+import br.com.anunciaai.ui.theme.CapsulaEscura
 import br.com.anunciaai.ui.theme.CorTextoSec
-import br.com.anunciaai.ui.theme.Destaque
+import br.com.anunciaai.ui.theme.VerdeNeon
 
 /**
- * v9.0 — Dock com 5 itens: Início | Vitrine | [entalhe/FAB] | Chat | Config.
- * Config absorve as Conexões. Badge de não-lidas no Chat quando há perguntas.
- * Toque com micro-feedback de escala (press = 0.9, solta = spring de volta).
+ * ═════════════════════════════════════════════════════════════════
+ *  v11.0 — NAV CÁPSULA FLUTUANTE (padrão Figma bike shop)
+ * ═════════════════════════════════════════════════════════════════
+ *  Barra em CÁPSULA (RoundedCornerShape 50%) flutuando acima do fundo
+ *  (padding 24dp bottom / 16dp laterais), fundo #1E1E24 com sombra.
+ *  O FAB verde-lime é o ÍCONE CENTRAL, integrado dentro do shape,
+ *  maior que os demais, sem notch torto.
+ *  Uso: NÃO é bottomBar — é overlay no Box da tela: { Conteudo();
+ *    CapsulaFlutuante(...) alinhada BottomCenter }
  */
 @Composable
-fun BarraDockNova(
+fun CapsulaFlutuante(
     atual: String,
     onNav: (String) -> Unit,
-    naoLidas: Int = 0,
     modifier: Modifier = Modifier
 ) {
-    androidx.compose.material3.BottomAppBar(
-        modifier = modifier.clip(NotchShape(30.dp)),
-        containerColor = CorSuperficie,
-        contentColor = CorTextoSec,
-        tonalElevation = 0.dp
+    val naoLidas by EstadoInbox.naoLidas.collectAsState()
+
+    Box(
+        modifier
+            .padding(start = 16.dp, end = 16.dp, bottom = 24.dp)
+            .fillMaxWidth()
+            .height(64.dp)
+            .clip(RoundedCornerShape(50))
+            .background(CapsulaEscura)
+            .shadowAdvanced()
     ) {
-        ItemDock(Rotas.LISTA, atual, "Início", Icons.Default.Home, onNav, Modifier.weight(1f))
-        ItemDock(Rotas.VITRINE, atual, "Vitrine", Icons.Default.GridView, onNav, Modifier.weight(1f))
-        Spacer(Modifier.weight(1f))
-        ItemDock(Rotas.MENSAGENS, atual, "Chat", Icons.Default.ChatBubbleOutline, onNav, Modifier.weight(1f), badge = naoLidas)
-        ItemDock(Rotas.CONFIG, atual, "Config", Icons.Outlined.Settings, onNav, Modifier.weight(1f))
+        Row(
+            Modifier.fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            ItemCapsula(Rotas.LISTA, atual, "Início", Icons.Default.Home, onNav, Modifier.weight(1f))
+            ItemCapsula(Rotas.VITRINE, atual, "Vitrine", Icons.Default.GridView, onNav, Modifier.weight(1f))
+            // FAB integrado: círculo verde-lime MAIOR no centro da cápsula
+            Box(
+                Modifier
+                    .weight(1.2f)
+                    .fillMaxHeight()
+                    .padding(vertical = 6.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Box(
+                    Modifier
+                        .size(52.dp)
+                        .clip(CircleShape)
+                        .background(VerdeNeon)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) { onNav(Rotas.CAPTURA) },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        Icons.Default.Add,
+                        contentDescription = "Vender",
+                        tint = Color(0xFF101601),
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
+            }
+            ItemCapsula(Rotas.MENSAGENS, atual, "Chat", Icons.Default.ChatBubbleOutline, onNav, Modifier.weight(1f), badge = naoLidas)
+            ItemCapsula(Rotas.CONFIG, atual, "Config", Icons.Outlined.Settings, onNav, Modifier.weight(1f))
+        }
     }
 }
 
-/** Wrapper com badge automático: lê EstadoInbox (v9) — usar nos Scaffolds. */
-@Composable
-fun BarraDockComBadge(atual: String, onNav: (String) -> Unit, modifier: Modifier = Modifier) {
-    val naoLidas by EstadoInboxGlobal.collectAsState()
-    BarraDockNova(atual = atual, onNav = onNav, naoLidas = naoLidas, modifier = modifier)
-}
+/** Sombra suave da cápsula (modifier avançado). */
+private fun Modifier.shadowAdvanced(): Modifier = this
+    .shadow(18.dp, RoundedCornerShape(50))
 
-/** Acesso ao EstadoInbox sem import circular. */
-val EstadoInboxGlobal = br.com.anunciaai.ui.screens.EstadoInbox.naoLidas
-
-/** Item com escala animada no ativo (+15%) e micro-press (0.9) no toque. */
+/** Item da cápsula: ícone + label pequeno, ativo cresce 12% e fica lime. */
 @Composable
-private fun ItemDock(
+private fun ItemCapsula(
     rota: String,
     atual: String,
     rotulo: String,
@@ -82,60 +122,37 @@ private fun ItemDock(
     badge: Int = 0
 ) {
     val ativo = rota == atual
-    val interacao = remember { MutableInteractionSource() }
     val escala by animateFloatAsState(
-        targetValue = if (ativo) 1.15f else 1f,
+        targetValue = if (ativo) 1.12f else 1f,
         animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium),
-        label = "escala_$rotulo"
+        label = "esc_$rotulo"
     )
     val cor by animateColorAsState(
-        targetValue = if (ativo) Destaque else CorTextoSec,
+        targetValue = if (ativo) VerdeNeon else CorTextoSec,
         animationSpec = tween(300),
         label = "cor_$rotulo"
     )
     Column(
         modifier
-            .clickable(interactionSource = interacao, indication = null) { onNav(rota) }
-            .padding(vertical = 10.dp),
+            .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { onNav(rota) }
+            .padding(vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         BadgedBox(badge = {
-            if (badge > 0) Badge(containerColor = Destaque, contentColor = androidx.compose.ui.graphics.Color(0xFF12092B)) {
+            if (badge > 0) Badge(containerColor = VerdeNeon, contentColor = Color(0xFF101601)) {
                 Text(if (badge > 9) "9+" else "$badge")
             }
         }) {
             Icon(icone, contentDescription = rotulo, tint = cor,
                 modifier = Modifier.size(24.dp).scale(escala))
         }
-        Text(rotulo, style = MaterialTheme.typography.labelMedium, color = cor, maxLines = 1)
+        Text(rotulo, style = MaterialTheme.typography.labelSmall, color = cor, maxLines = 1)
     }
 }
 
-/** Entalhe circular central (v8) — mantido. */
-data class NotchShape(private val raio: androidx.compose.ui.unit.Dp) : androidx.compose.ui.graphics.Shape {
-    override fun createOutline(
-        size: androidx.compose.ui.geometry.Size,
-        layoutDirection: androidx.compose.ui.unit.LayoutDirection,
-        density: androidx.compose.ui.unit.Density
-    ): androidx.compose.ui.graphics.Outline {
-        val r = with(density) { raio.toPx() }
-        val cx = size.width / 2f
-        val path = androidx.compose.ui.graphics.Path().apply {
-            moveTo(0f, 0f)
-            lineTo(cx - r - 16f, 0f)
-            cubicTo(cx - r, 0f, cx - r, 0f, cx - r, 10f)
-            arcTo(
-                rect = androidx.compose.ui.geometry.Rect(cx - r, -r, cx + r, r),
-                startAngleDegrees = 180f,
-                sweepAngleDegrees = 180f,
-                forceMoveTo = false
-            )
-            cubicTo(cx + r, 0f, cx + r, 0f, cx + r + 16f, 0f)
-            lineTo(size.width, 0f)
-            lineTo(size.width, size.height)
-            lineTo(0f, size.height)
-            close()
-        }
-        return androidx.compose.ui.graphics.Outline.Generic(path)
-    }
+/** Compatibilidade: cápsula flutuante usada no bottomBar dos Scaffolds.
+ *  O Scaffold cede o espaço; a cápsula desenha flutuando com margens. */
+@Composable
+fun BarraDockComBadge(atual: String, onNav: (String) -> Unit, modifier: Modifier = Modifier) {
+    CapsulaFlutuante(atual = atual, onNav = onNav, modifier = modifier)
 }

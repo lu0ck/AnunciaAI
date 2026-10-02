@@ -70,6 +70,13 @@ Kotlin + Jetpack Compose · Room · Retrofit/OkHttp · WebView (`evaluateJavascr
 - (nada — todos os builds passaram)
 
 ## Feito (adicional, depois do build 1)
+- [x] 30/09 — **v11.0 (BUILD 34) — REBOOT VISUAL "Figma Bike Shop"** (Lucas rejeitou a v10: "só mudou a cor pra roxo"):
+  - **App agora é CLARO**: fundo #F4F4F7, cards BRANCOS, texto quase-preto #17171F, statusbar clara (SystemBarStyle.light). Adeus tema escuro/índigo — 0 resíduo no dex.
+  - **Nav CÁPSULA FLUTUANTE** (Figma): BottomAppBar extinta de vez — cápsula RoundedCornerShape(50%), fundo #1E1E24, sombra 18dp, flutuando com padding 24/16dp. FAB verde-lime #A3E635 INTEGRADO no centro (52dp, maior que os itens), sem notch.
+  - **Paleta**: VerdeNeon #A3E635 (FAB/chips ativos), Destaque #65A30D (lime legível sobre claro), cápsula #1E1E24, erro #FF3B30.
+  - **Vitrine catálogo de luxo**: cards brancos 24dp + sombra, foto 150dp arredondada 18dp dominando o card, nome cinza pequeno + **preço GIGANTE headlineSmall ExtraBold quase-preto**.
+  - **Chips pílula na Revisão**: ativo = fundo lime neon + texto escuro; inativo = border fino cinza + texto cinza. FlowRow mantido.
+  - **Verificado no binário**: cores bike 3/3 presentes, aurora 0/4 resíduos; versionCode 19 / v11.0; nvapi- OK; assinatura 5bb25361. APK: AnunciaAI-11.0.apk (24MB), servidor :8899.
 - [x] 30/09 — **v10.0 (BUILD 33) — RUPTURA DE DESIGN: "Aurora Tech"** (Lucas: "vc está preso nesse design, muda ele"):
   - **Paleta NOVA inteira**: fundo **azul-abissal #0A0E1A** (não mais cinza #12151A), superfície azulada **#141B2E**, destaque **índigo elétrico #7C6BFF** (adeus verde-menta #00C896), acento secundário **ciano aurora #4FD8EB**, gradiente do resumo índigo→**violeta profundo #2E1B6B**, textos azulados #EDEFF7/#8A93AD. Containers do tema (primaryContainer/onPrimary etc.) recalculados pro índigo.
   - **Verificação binária**: as 5 cores novas presentes no dex; as 5 antigas (00C896/12151A/1B1F26/0A5C6E/06231B) **AUSENTES** — troca 100%, zero resíduo. brilhoNeon agora emite glow índigo. versionCode 18 / v10.0, assinatura 5bb25361, nvapi- OK.
@@ -194,7 +201,7 @@ GRADLE_USER_HOME=$PWD/.gradle-home ANDROID_HOME=$PWD/android-sdk JAVA_HOME=$PWD/
 ```
 
 ## ⚠️ ESTADO ATUAL (30/09 v9 — ler isto primeiro no chat novo)
-- **APK atual: `AnunciaAI-10.0.apk` (versionCode 18, v10.0 "Aurora Tech", 24MB)** na raiz, servidor LAN :8899 NO AR. **NÃO testado no celular**. v10 = paleta nova inteira (azul-abissal/índigo/ciano); v9: aba Config, Perfil editável c/ redes, badge Chat.
+- **APK atual: `AnunciaAI-11.0.apk` (versionCode 19, v11.0 REBOOT claro/bike, 24MB)** na raiz, servidor :8899 NO AR. **NÃO testado**. v11: app claro, cápsula flutuante, cards brancos 24dp, chips pílula lime.
 - Git: tudo commitado e pushado até `f8809cd`. Repo: github.com/lu0ck/AnunciaAI (PÚBLICA).
 - IA: NVIDIA NIM (llama-3.2-11b-vision) FUNCIONAL — chave em local.properties, testada E2E (JSON no contrato novo: titulo/descricao/categoria_sugerida com taxonomia ' > '/preco_sugerido/preco_comparativo_mercado/condicao estrita em 4 valores).
 - Design atual: tema escuro #12151A/#1B1F26, destaque única #00C896, Manrope estática (5 pesos), badges quadrados com cor de marca, dock BottomAppBar+NotchShape com FAB central, neon glassmorphism (brilhoNeon), Vitrine grid 2 colunas com entrada escalonada, câmera imersiva CameraX com scanner EAN (ML Kit).

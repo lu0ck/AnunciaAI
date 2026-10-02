@@ -207,13 +207,13 @@ fun ListaItensScreen(
                                             if (pct >= 0) Icons.Default.TrendingUp else Icons.Default.TrendingDown,
                                             contentDescription = null,
                                             Modifier.size(14.dp),
-                                            tint = if (pct >= 0) Color(0xFF4FD8EB) else Color(0xFFFF5470)
+                                            tint = if (pct >= 0) Color(0xFF65A30D) else Color(0xFFFF5470)
                                         )
                                         Spacer(Modifier.width(2.dp))
                                         Text(
                                             "${if (pct >= 0) "+" else ""}$pct%",
                                             style = MaterialTheme.typography.labelSmall,
-                                            color = if (pct >= 0) Color(0xFF4FD8EB) else Color(0xFFFF5470)
+                                            color = if (pct >= 0) Color(0xFF65A30D) else Color(0xFFFF5470)
                                         )
                                     }
                                 }

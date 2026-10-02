@@ -4,10 +4,13 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.background
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -289,17 +292,37 @@ fun RevisaoScreen(
                     )
                 }
                 Spacer(Modifier.height(12.dp))
-                // v7 (bug do chip vertical): FlowRow — chips nos 4 VALORES EXATOS da IA
+                // v11: chips PÍLULA (Figma bike) — ativo = lime neon + texto escuro;
+                // inativo = border fino cinza + texto cinza. Nada de quadrado.
                 FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     SugestaoIA.CONDICOES.forEach { valor ->
-                        FilterChip(
-                            selected = condicao == valor,
-                            onClick = { condicao = valor },
-                            label = { Text(valor) }
-                        )
+                        val selecionado = condicao == valor
+                        Box(
+                            Modifier
+                                .clip(androidx.compose.foundation.shape.RoundedCornerShape(50))
+                                .background(
+                                    if (selecionado) br.com.anunciaai.ui.theme.VerdeNeon
+                                    else androidx.compose.ui.graphics.Color.Transparent
+                                )
+                                .border(
+                                    width = 1.dp,
+                                    color = if (selecionado) br.com.anunciaai.ui.theme.VerdeNeon
+                                    else MaterialTheme.colorScheme.outline,
+                                    shape = androidx.compose.foundation.shape.RoundedCornerShape(50)
+                                )
+                                .clickable { condicao = valor }
+                                .padding(horizontal = 18.dp, vertical = 10.dp)
+                        ) {
+                            Text(
+                                valor,
+                                style = MaterialTheme.typography.labelLarge,
+                                color = if (selecionado) androidx.compose.ui.graphics.Color(0xFF101601)
+                                else MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
                 // v7: preço comparativo do mercado (quando a IA devolve)

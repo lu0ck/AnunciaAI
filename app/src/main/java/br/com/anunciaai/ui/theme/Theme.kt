@@ -11,105 +11,73 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import br.com.anunciaai.R
 
-// ── Sistema de design v10 "AURORA TECH": azul-abissal + índigo elétrico ──
-// Ruptura total com o verde-menta/cinza anterior a pedido do Lucas.
-val Destaque = Color(0xFF7C6BFF)      // índigo elétrico
-val DestaqueCiano = Color(0xFF4FD8EB) // ciano aurora (links/acentos secundários)
-val CorFundo = Color(0xFF0A0E1A)      // azul profundo (não cinza!)
-val CorSuperficie = Color(0xFF141B2E) // superfície azulada
-val CorTexto = Color(0xFFEDEFF7)      // texto com leve azul
-val CorTextoSec = Color(0xFF8A93AD)   // secundário azulado
-val CorNeutro = Color(0xFF4B5570)     // neutro azulado
-val CorErro = Color(0xFFFF5470)
+// ═════════════════════════════════════════════════════════════════
+//  v11.0 — REBOOT VISUAL (padrão Figma "Online Bike Shopping App")
+//  Claro, desportivo, premium. Adeus tema escuro/índigo.
+// ═════════════════════════════════════════════════════════════════
+val VerdeNeon = Color(0xFFA3E635)   // lime neon — FAB, chips ativos, destaques de superfície
+val Destaque = Color(0xFF65A30D)    // lime-600 — textos/links/ícones sobre fundo claro (legível)
+val CapsulaEscura = Color(0xFF1E1E24) // cápsula da navegação flutuante
+val CorFundo = Color(0xFFF4F4F7)    // fundo claro (negative space)
+val CorSuperficie = Color(0xFFFFFFFF) // cards brancos
+val CorTexto = Color(0xFF17171F)    // quase-preto premium
+val CorTextoSec = Color(0xFF8E8E9C)
+val CorNeutro = Color(0xFFDCDCE6)  // bordas finas
+val CorErro = Color(0xFFFF3B30)
+val Petroleo = Color(0xFF3F6212)    // fim do gradiente (lime profundo)
 
-// Cores de marca REAIS (v4) — badge de cada plataforma em toda a lista, Mensagens e selos "publicado em"
+// Cores de marca REAIS — badges por plataforma
 val CorPlataforma = mapOf(
     "MERCADO_LIVRE" to Color(0xFFFFE600),
-    "EBAY" to Color(0xFF0064D2), // badge eBay é multicor (ver IconePlataforma); fallback azul
+    "EBAY" to Color(0xFF0064D2),
     "SHOPEE" to Color(0xFFEE4D2D),
     "OLX" to Color(0xFF7C1FD6),
     "FACEBOOK_MARKETPLACE" to Color(0xFF1877F2),
     "ENJOEI" to Color(0xFFFF2D78)
 )
-
-// Detalhe azul do ML sobre o amarelo; as demais usam branco
 val CorTextoMarca = mapOf(
     "MERCADO_LIVRE" to Color(0xFF2D3277)
 )
 
-// Fim do gradiente do card de resumo (índigo → violeta profundo)
-val Petroleo = Color(0xFF2E1B6B)
-
-private val EsquemaEscuro = darkColorScheme(
-    primary = Destaque,
-    onPrimary = Color(0xFF12092B),
-    primaryContainer = Color(0xFF3A2E8C),
-    onPrimaryContainer = Destaque,
+private val EsquemaClaroBike = lightColorScheme(
+    primary = VerdeNeon,
+    onPrimary = Color(0xFF101601),
+    primaryContainer = Color(0xFFECFCCB),
+    onPrimaryContainer = Color(0xFF365314),
     secondary = Destaque,
-    onSecondary = Color(0xFF12092B),
-    secondaryContainer = Color(0xFF3A2E8C),
-    onSecondaryContainer = Destaque,
+    onSecondary = Color.White,
+    secondaryContainer = Color(0xFFECFCCB),
+    onSecondaryContainer = Color(0xFF365314),
     tertiary = Destaque,
-    onTertiary = Color(0xFF12092B),
+    onTertiary = Color.White,
     background = CorFundo,
     onBackground = CorTexto,
     surface = CorFundo,
     onSurface = CorTexto,
-    surfaceVariant = CorSuperficie,
+    surfaceVariant = Color(0xFFE9E9F0),
     onSurfaceVariant = CorTextoSec,
-    surfaceContainerLowest = CorFundo,
-    surfaceContainerLow = CorFundo,
-    surfaceContainer = CorSuperficie,
-    surfaceContainerHigh = CorSuperficie,
-    surfaceContainerHighest = CorSuperficie,
+    surfaceContainerLowest = Color.White,
+    surfaceContainerLow = Color(0xFFFAFAFC),
+    surfaceContainer = CorSuperficie,          // cards brancos
+    surfaceContainerHigh = Color(0xFFF1F1F5),
+    surfaceContainerHighest = Color(0xFFE9E9F0),
     outline = CorNeutro,
-    outlineVariant = CorSuperficie,   // divisor fino de 1px entre linhas de lista
+    outlineVariant = Color(0xFFE7E7EE),
     error = CorErro,
-    onError = Color(0xFF2B0710),
-    errorContainer = Color(0xFF3A1622),
-    onErrorContainer = Color(0xFFFFB3C2)
+    onError = Color.White,
+    errorContainer = Color(0xFFFFE4E1),
+    onErrorContainer = Color(0xFF7A1B12)
 )
 
-// Tema claro recebe a MESMA identidade (o app é escuro por design — não há "modo claro" visual)
-private val EsquemaClaro = lightColorScheme(
-    primary = Destaque,
-    onPrimary = Color(0xFF12092B),
-    primaryContainer = Color(0xFF3A2E8C),
-    onPrimaryContainer = Destaque,
-    secondary = Destaque,
-    onSecondary = Color(0xFF12092B),
-    secondaryContainer = Color(0xFF3A2E8C),
-    onSecondaryContainer = Destaque,
-    tertiary = Destaque,
-    onTertiary = Color(0xFF12092B),
-    background = CorFundo,
-    onBackground = CorTexto,
-    surface = CorFundo,
-    onSurface = CorTexto,
-    surfaceVariant = CorSuperficie,
-    onSurfaceVariant = CorTextoSec,
-    surfaceContainerLowest = CorFundo,
-    surfaceContainerLow = CorFundo,
-    surfaceContainer = CorSuperficie,
-    surfaceContainerHigh = CorSuperficie,
-    surfaceContainerHighest = CorSuperficie,
-    outline = CorNeutro,
-    outlineVariant = CorSuperficie,
-    error = CorErro,
-    onError = Color(0xFF2B0710),
-    errorContainer = Color(0xFF3A1622),
-    onErrorContainer = Color(0xFFFFB3C2)
-)
+// O app é CLARO por design agora; o "escuro" recebe o mesmo mapa (nunca herdou tema do sistema)
+private val EsquemaEscuro = EsquemaClaroBike
 
-// Manrope em PESOS ESTÁTICOS (v4.1): a fonte variável + variationSettings tinha bug de
-// shaping no Android que quebrava palavras com "L" maiúsculo ("Livros" → "l ivros").
-// Cada peso é um arquivo próprio em res/font — sem variationSettings.
+// Manrope em pesos ESTÁTICOS (fix do bug de shaping "l ivros")
 val Manrope = FontFamily(
     Font(R.font.manrope_regular, FontWeight.Normal),
     Font(R.font.manrope_medium, FontWeight.Medium),
@@ -118,29 +86,29 @@ val Manrope = FontFamily(
     Font(R.font.manrope_extrabold, FontWeight.ExtraBold)
 )
 
-// Tipografia da spec: título de tela 28/800, título de linha 16/600, corpo 14/400 — sem caixa alta.
+// Tipografia bike-shop: preços GIGANTES em ExtraBold; corpo limpo
 private val Tipografia = Typography(
-    displaySmall = TextStyle(fontFamily = Manrope, fontWeight = FontWeight.ExtraBold, fontSize = 34.sp),
-    headlineLarge = TextStyle(fontFamily = Manrope, fontWeight = FontWeight.ExtraBold, fontSize = 32.sp),
+    displaySmall = TextStyle(fontFamily = Manrope, fontWeight = FontWeight.ExtraBold, fontSize = 40.sp),
+    headlineLarge = TextStyle(fontFamily = Manrope, fontWeight = FontWeight.ExtraBold, fontSize = 34.sp),
     headlineMedium = TextStyle(fontFamily = Manrope, fontWeight = FontWeight.ExtraBold, fontSize = 30.sp),
-    headlineSmall = TextStyle(fontFamily = Manrope, fontWeight = FontWeight.ExtraBold, fontSize = 28.sp),
-    titleLarge = TextStyle(fontFamily = Manrope, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp),
-    titleMedium = TextStyle(fontFamily = Manrope, fontWeight = FontWeight.SemiBold, fontSize = 16.sp),
+    headlineSmall = TextStyle(fontFamily = Manrope, fontWeight = FontWeight.ExtraBold, fontSize = 26.sp),
+    titleLarge = TextStyle(fontFamily = Manrope, fontWeight = FontWeight.ExtraBold, fontSize = 22.sp),
+    titleMedium = TextStyle(fontFamily = Manrope, fontWeight = FontWeight.Bold, fontSize = 16.sp),
     titleSmall = TextStyle(fontFamily = Manrope, fontWeight = FontWeight.SemiBold, fontSize = 14.sp),
     bodyLarge = TextStyle(fontFamily = Manrope, fontWeight = FontWeight.Normal, fontSize = 16.sp),
     bodyMedium = TextStyle(fontFamily = Manrope, fontWeight = FontWeight.Normal, fontSize = 14.sp),
     bodySmall = TextStyle(fontFamily = Manrope, fontWeight = FontWeight.Normal, fontSize = 12.sp),
-    labelLarge = TextStyle(fontFamily = Manrope, fontWeight = FontWeight.SemiBold, fontSize = 14.sp),
+    labelLarge = TextStyle(fontFamily = Manrope, fontWeight = FontWeight.Bold, fontSize = 14.sp),
     labelMedium = TextStyle(fontFamily = Manrope, fontWeight = FontWeight.SemiBold, fontSize = 12.sp),
-    labelSmall = TextStyle(fontFamily = Manrope, fontWeight = FontWeight.Medium, fontSize = 11.sp)
+    labelSmall = TextStyle(fontFamily = Manrope, fontWeight = FontWeight.SemiBold, fontSize = 11.sp)
 )
-// Raios por função (não um raio genérico em tudo)
+
 private val Formas = Shapes(
-    extraSmall = RoundedCornerShape(6.dp),
-    small = RoundedCornerShape(10.dp),
+    extraSmall = RoundedCornerShape(8.dp),
+    small = RoundedCornerShape(12.dp),
     medium = RoundedCornerShape(16.dp),
-    large = RoundedCornerShape(22.dp),
-    extraLarge = RoundedCornerShape(28.dp)
+    large = RoundedCornerShape(24.dp),
+    extraLarge = RoundedCornerShape(32.dp)
 )
 
 @Composable
@@ -149,7 +117,7 @@ fun AnunciaAITheme(
     content: @Composable () -> Unit
 ) {
     MaterialTheme(
-        colorScheme = if (darkTheme) EsquemaEscuro else EsquemaClaro,
+        colorScheme = EsquemaClaroBike,
         typography = Tipografia,
         shapes = Formas,
         content = content

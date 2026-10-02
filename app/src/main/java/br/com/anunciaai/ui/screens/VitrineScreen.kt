@@ -17,6 +17,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -86,21 +87,22 @@ fun VitrineScreen(
                     ) {
                     Card(
                         onClick = { onAbrirItem(item.id) },
-                        shape = RoundedCornerShape(20.dp), // PILAR 2: cantos 20dp
+                        shape = RoundedCornerShape(24.dp), // v11 bike: cantos 24dp
                         colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceContainer
+                            containerColor = androidx.compose.ui.graphics.Color.White // card branco
                         ),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .brilhoNeon() // PILAR 2: glow verde-menta 10% atrás do card
+                            .shadow(8.dp, RoundedCornerShape(24.dp))
                     ) {
                         Column {
                             Box(
                                 Modifier
                                     .fillMaxWidth()
-                                    .height(140.dp)
-                                    .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                                    .height(150.dp)  // v11: imagem domina o card
+                                    .padding(10.dp)
+                                    .clip(RoundedCornerShape(18.dp))
                             ) {
                                 FotoPrimeira(item.id, tamanho = 280)
                                 Box(Modifier.align(Alignment.BottomStart).padding(8.dp)) {
@@ -112,7 +114,7 @@ fun VitrineScreen(
                                     }
                                 }
                             }
-                            Column(Modifier.padding(10.dp)) {
+                            Column(Modifier.padding(horizontal = 14.dp, vertical = 10.dp)) {
                                 Text(
                                     item.titulo.ifEmpty { "(sem título)" },
                                     style = MaterialTheme.typography.bodyMedium,
@@ -121,9 +123,9 @@ fun VitrineScreen(
                                 )
                                 Text(
                                     "R$ ${"%.2f".format(item.precoFinal.takeIf { it > 0 } ?: item.precoSugerido)}",
-                                    style = MaterialTheme.typography.titleMedium,
+                                    style = MaterialTheme.typography.headlineSmall, // v11: preço GIGANTE
                                     fontWeight = FontWeight.ExtraBold,
-                                    color = Color(0xFFEDEFF7)
+                                    color = androidx.compose.ui.graphics.Color(0xFF17171F)
                                 )
                             }
                         }
