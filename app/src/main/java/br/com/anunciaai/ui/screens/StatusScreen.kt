@@ -13,7 +13,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import br.com.anunciaai.AnunciaAIApp
 import br.com.anunciaai.publica.webview.SessaoPublicacaoWeb
-import br.com.anunciaai.ui.BarraDockNova
+import br.com.anunciaai.ui.BarraDockComBadge
 import br.com.anunciaai.ui.IconePlataforma
 import br.com.anunciaai.ui.Plataforma
 import br.com.anunciaai.ui.Rotas
@@ -42,7 +42,7 @@ fun StatusScreen(
                 }
             )
         },
-        bottomBar = { BarraDockNova(Rotas.LISTA, onNavBottom) }
+        bottomBar = { BarraDockComBadge(Rotas.LISTA, onNavBottom) }
     ) { pad ->
         Column(Modifier.padding(pad).padding(16.dp)) {
             resultadoWeb?.let { r ->

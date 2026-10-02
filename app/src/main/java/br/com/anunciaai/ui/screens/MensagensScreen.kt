@@ -21,13 +21,18 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import br.com.anunciaai.AnunciaAIApp
 import br.com.anunciaai.publica.mercadolivre.MercadoLivreApi
-import br.com.anunciaai.ui.BarraDockNova
+import br.com.anunciaai.ui.BarraDockComBadge
 import br.com.anunciaai.ui.EstadoVazio
 import br.com.anunciaai.ui.IconePlataforma
 import br.com.anunciaai.ui.Plataforma
 import br.com.anunciaai.ui.Rotas
 import br.com.anunciaai.ui.theme.Destaque
 import kotlinx.coroutines.launch
+
+/** v9 — Estado de não-lidas do inbox (badge do dock). MensagensScreen publica; dock lê. */
+object EstadoInbox {
+    val naoLidas = kotlinx.coroutines.flow.MutableStateFlow(0)
+}
 
 /**
  * Mensagens (v5.3 — ITEM 2 da spec visual):
@@ -59,7 +64,7 @@ fun MensagensScreen(onNavBottom: (String) -> Unit = {}) {
             carregando = true
             erro = null
             try {
-                perguntas = MercadoLivreApi().puxarPerguntas(conta.accessTokenCriptografado, "")
+                perguntas = MercadoLivreApi().puxarPerguntas(conta.accessTokenCriptografado, "").also { EstadoInbox.naoLidas.value = it.size }
             } catch (e: Exception) {
                 erro = "ML: ${e.message}"
             }
@@ -125,21 +130,8 @@ fun MensagensScreen(onNavBottom: (String) -> Unit = {}) {
 
     Scaffold(
         topBar = { TopAppBar(title = { Text("Mensagens") }) },
-        bottomBar = { BarraDockNova(Rotas.MENSAGENS, onNavBottom) },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { onNavBottom(Rotas.CAPTURA) },
-                containerColor = Destaque,
-                contentColor = androidx.compose.ui.graphics.Color(0xFF06231B),
-                shape = androidx.compose.foundation.shape.CircleShape,
-                modifier = Modifier.size(58.dp)
-            ) {
-                Icon(
-                    androidx.compose.material.icons.Icons.Default.Add,
-                    contentDescription = "Vender"
-                )
-            }
-        },
+        bottomBar = { BarraDockComBadge(Rotas.MENSAGENS, onNavBottom) },
+        floatingActionButton = { FabCentral(onNavBottom) },
         floatingActionButtonPosition = FabPosition.Center
     ) { pad ->
         Column(Modifier.padding(pad).fillMaxSize()) {

@@ -96,3 +96,15 @@ interface ContaDao {
     @Query("DELETE FROM contas_conectadas WHERE plataforma = :plataforma")
     suspend fun apagarPorPlataforma(plataforma: String)
 }
+
+@Dao
+interface PerfilDao {
+    @Query("SELECT * FROM perfil_usuario WHERE id = 1")
+    fun observe(): Flow<PerfilUsuario?>
+
+    @Query("SELECT * FROM perfil_usuario WHERE id = 1")
+    suspend fun porId(): PerfilUsuario?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun salvar(perfil: PerfilUsuario)
+}

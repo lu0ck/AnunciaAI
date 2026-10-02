@@ -30,7 +30,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.*
 import br.com.anunciaai.AnunciaAIApp
-import br.com.anunciaai.ui.BarraDockNova
+import br.com.anunciaai.ui.BarraDockComBadge
 import br.com.anunciaai.ui.IconePlataforma
 import br.com.anunciaai.ui.Plataforma
 import br.com.anunciaai.ui.Rotas
@@ -111,23 +111,10 @@ fun ListaItensScreen(
                 }
             )
         },
-        bottomBar = { BarraDockNova(Rotas.LISTA, onNavBottom) },
+        bottomBar = { BarraDockComBadge(Rotas.LISTA, onNavBottom) },
         // v6.1: FAB "Vender" CENTRAL ancorado pelo Scaffold sobre o vão do dock.
         // (O FAB antigo do canto foi removido — PASSO 1.)
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = onNovoItem,
-                containerColor = Destaque,
-                contentColor = Color(0xFF06231B),
-                shape = androidx.compose.foundation.shape.CircleShape,
-                modifier = Modifier.size(58.dp)
-            ) {
-                Icon(
-                    androidx.compose.material.icons.Icons.Default.Add,
-                    contentDescription = "Vender"
-                )
-            }
-        },
+        floatingActionButton = { FabCentral(onNavBottom) },
         floatingActionButtonPosition = FabPosition.Center
     ) { pad ->
         LazyColumn(

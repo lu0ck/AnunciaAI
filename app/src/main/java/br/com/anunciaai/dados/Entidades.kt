@@ -67,3 +67,18 @@ data class ContaConectada(
     val refreshTokenCriptografado: String? = null,
     val expiraEm: Long? = null
 )
+
+/** v9 (perfil do usuário): foto, nome, nick, bio e redes sociais — single-user. */
+@Entity(tableName = "perfil_usuario")
+data class PerfilUsuario(
+    @PrimaryKey val id: Int = 1,
+    val fotoUri: String? = null,
+    val nome: String = "",
+    val nick: String = "",
+    val bio: String = "",
+    val instagram: String = "",
+    val whatsapp: String = "",
+    val telegram: String = "",
+    val tiktok: String = "",
+    val atualizadoEm: Long = System.currentTimeMillis()
+)

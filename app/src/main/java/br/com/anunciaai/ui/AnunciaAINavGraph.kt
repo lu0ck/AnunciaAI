@@ -13,6 +13,8 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.core.tween
 import br.com.anunciaai.ui.screens.AnaliseScreen
+import br.com.anunciaai.ui.screens.ConfigScreen
+import br.com.anunciaai.ui.screens.ConexoesScreen
 import br.com.anunciaai.ui.screens.DetalheItemScreen
 import br.com.anunciaai.ui.screens.ListaItensScreen
 import br.com.anunciaai.ui.screens.MensagensScreen
@@ -27,6 +29,9 @@ object Rotas {
     const val CAPTURA = "captura"
     const val VITRINE = "vitrine"
     const val PERFIL = "perfil"
+    const val PERFIL_EDIT = "perfilEdit"
+    const val CONEXOES = "conexoes"
+    const val CONFIG = "config"
     const val MENSAGENS = "mensagens"
     const val ANALISE = "analise/{itemId}?ean={ean}"
     const val REVISAO = "revisao/{itemId}"
@@ -80,7 +85,27 @@ fun AnunciaAINavGraph() {
             )
         }
         composable(Rotas.PERFIL) {
-            PerfilScreen(onNavBottom = navBottom)
+            // v9: Perfil do dock → tela de edição completa (foto/nick/redes)
+            PerfilScreen(
+                onVoltar = { nav.popBackStack() },
+                onNavBottom = navBottom
+            )
+        }
+        composable(Rotas.PERFIL_EDIT) {
+            PerfilScreen(
+                onVoltar = { nav.popBackStack() },
+                onNavBottom = navBottom
+            )
+        }
+        composable(Rotas.CONEXOES) {
+            ConexoesScreen(embutida = false)
+        }
+        composable(Rotas.CONFIG) {
+            ConfigScreen(
+                onNavBottom = navBottom,
+                onAbrirPerfil = { nav.navigate(Rotas.PERFIL_EDIT) },
+                onAbrirConexoes = { nav.navigate(Rotas.CONEXOES) }
+            )
         }
         composable(Rotas.MENSAGENS) {
             MensagensScreen(onNavBottom = navBottom)

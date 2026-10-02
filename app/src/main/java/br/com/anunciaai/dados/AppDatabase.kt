@@ -6,8 +6,8 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 @Database(
-    entities = [Item::class, FotoItem::class, PublicacaoPlataforma::class, ContaConectada::class],
-    version = 3,
+    entities = [Item::class, FotoItem::class, PublicacaoPlataforma::class, ContaConectada::class, PerfilUsuario::class],
+    version = 4,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -15,6 +15,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun fotoDao(): FotoDao
     abstract fun publicacaoDao(): PublicacaoDao
     abstract fun contaDao(): ContaDao
+    abstract fun perfilDao(): PerfilDao
 
     companion object {
         @Volatile

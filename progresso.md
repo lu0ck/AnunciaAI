@@ -70,6 +70,12 @@ Kotlin + Jetpack Compose · Room · Retrofit/OkHttp · WebView (`evaluateJavascr
 - (nada — todos os builds passaram)
 
 ## Feito (adicional, depois do build 1)
+- [x] 30/09 — **v9.0 (BUILD 32) — aba Configurações, Perfil completo com redes, badge de chat, dock 5 itens:**
+  - **Dock v9**: agora 5 itens — **Início | Vitrine | [entalhe/FAB] | Chat | Config**. "Mensagens" virou "Chat" com **badge de não-lidas** (EstadoInbox StateFlow alimentado pela contagem de perguntas ML; badge "9+" quando >9). Micro-press nos itens (indication=null).
+  - **ConfigScreen (nova)**: hub com Perfil, Conexões (absorvidas pra cá), estado da IA e Sobre. Rotas novas CONFIG/CONEXOES/PERFIL_EDIT.
+  - **PerfilScreen vira o perfil de verdade**: avatar 116dp com anel verde + botão Edit (foto da galeria via PickVisualMedia, copiada pro storage interno), campos **Nome, Nick, Bio + redes: Instagram, WhatsApp, Telegram, TikTok** — tudo salvo no Room (**DB v4**, tabela perfil_usuario, PerfilDao + repositório). Confirmação "Salvo ✓" animada.
+  - **Fabs padronizados**: `FabCentral` reutilizável (ConfigScreen) substituiu os FABs duplicados de Início/Vitrine/Mensagens; todos os docks via `BarraDockComBadge`.
+  - **Verificado**: versionCode 17 / v9.0; strings (Configurações, Salvar perfil, redes, Chat/Config, perfil_usuario) no dex; nvapi- OK; assinatura 5bb25361. APK 24MB (AnunciaAI-9.0.apk).
 - [x] 30/09 — **v8.0 (BUILD 31) — SUPER PROMPT: 5 PILARES implementados:**
   - **PILAR 1 (Dock premium)**: BottomAppBar oficial com **NotchShape** — Shape custom (createOutline, sem Canvas flutuante) que recorta entalhe circular central via clip(30dp); FAB ancorado pelo Scaffold `FabPosition.Center` encaixa no círculo. Ícones com animateFloatAsState: ativo cresce **15%** (spring bouncy) + cor 300ms.
   - **PILAR 2 (Neon Glassmorphism)**: novo modificador `brilhoNeon()` — glow radial verde-menta **10% de opacidade** por trás dos cards (Home no card de resumo, Vitrine em todos) + `fundoGradienteEscuro`. Cards **20dp** de raio. Vitrine: itens surgem **um a um** com AnimatedVisibility (slideInVertically + fadeIn, stagger 60ms/item).
@@ -183,8 +189,8 @@ GRADLE_USER_HOME=$PWD/.gradle-home ANDROID_HOME=$PWD/android-sdk JAVA_HOME=$PWD/
 GRADLE_USER_HOME=$PWD/.gradle-home ANDROID_HOME=$PWD/android-sdk JAVA_HOME=$PWD/jdk-17.0.20.1+1 ./gradle-8.10.2/bin/gradle assembleRelease --console=plain
 ```
 
-## ⚠️ ESTADO ATUAL (30/09 — ler isto primeiro no chat novo)
-- **APK atual: `AnunciaAI-8.0.apk` (versionCode 16, v8.0, 24MB — ML Kit embutido)** na raiz do projeto. Entregue via servidor LAN :8899 (derrubado após download). **Ainda NÃO testado no celular** — o Lucas baixou mas não reportou o teste da v8.0.
+## ⚠️ ESTADO ATUAL (30/09 v9 — ler isto primeiro no chat novo)
+- **APK atual: `AnunciaAI-9.0.apk` (versionCode 17, v9.0, 24MB)** na raiz, servidor LAN :8899 NO AR. **NÃO testado no celular**. v9: aba Config (Conexões foram pra lá), Perfil editável (foto/nick/bio/redes no Room DB v4), badge de não-lidas no Chat, dock 5 itens.
 - Git: tudo commitado e pushado até `f8809cd`. Repo: github.com/lu0ck/AnunciaAI (PÚBLICA).
 - IA: NVIDIA NIM (llama-3.2-11b-vision) FUNCIONAL — chave em local.properties, testada E2E (JSON no contrato novo: titulo/descricao/categoria_sugerida com taxonomia ' > '/preco_sugerido/preco_comparativo_mercado/condicao estrita em 4 valores).
 - Design atual: tema escuro #12151A/#1B1F26, destaque única #00C896, Manrope estática (5 pesos), badges quadrados com cor de marca, dock BottomAppBar+NotchShape com FAB central, neon glassmorphism (brilhoNeon), Vitrine grid 2 colunas com entrada escalonada, câmera imersiva CameraX com scanner EAN (ML Kit).

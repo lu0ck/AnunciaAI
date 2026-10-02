@@ -23,7 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import br.com.anunciaai.AnunciaAIApp
-import br.com.anunciaai.ui.BarraDockNova
+import br.com.anunciaai.ui.BarraDockComBadge
 import br.com.anunciaai.ui.EstadoVazio
 import br.com.anunciaai.ui.IconePlataforma
 import br.com.anunciaai.ui.Rotas
@@ -49,21 +49,8 @@ fun VitrineScreen(
 
     Scaffold(
         topBar = { TopAppBar(title = { Text("Vitrine") }) },
-        bottomBar = { BarraDockNova(Rotas.VITRINE, onNavBottom) },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = onNovoItem,
-                containerColor = Destaque,
-                contentColor = androidx.compose.ui.graphics.Color(0xFF06231B),
-                shape = androidx.compose.foundation.shape.CircleShape,
-                modifier = Modifier.size(58.dp)
-            ) {
-                Icon(
-                    androidx.compose.material.icons.Icons.Default.Add,
-                    contentDescription = "Vender"
-                )
-            }
-        },
+        bottomBar = { BarraDockComBadge(Rotas.VITRINE, onNavBottom) },
+        floatingActionButton = { FabCentral(onNavBottom) },
         floatingActionButtonPosition = FabPosition.Center
     ) { pad ->
         if (itens.isEmpty()) {

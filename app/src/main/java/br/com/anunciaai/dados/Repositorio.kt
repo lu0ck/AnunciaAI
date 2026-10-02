@@ -7,6 +7,7 @@ class Repositorio(private val banco: AppDatabase) {
     private val fotoDao = banco.fotoDao()
     private val pubDao = banco.publicacaoDao()
     private val contaDao = banco.contaDao()
+    private val perfilDao = banco.perfilDao()
 
     // Itens
     fun itens(): Flow<List<Item>> = itemDao.observeTodos()
@@ -49,4 +50,9 @@ class Repositorio(private val banco: AppDatabase) {
     suspend fun conta(plataforma: String): ContaConectada? = contaDao.porPlataforma(plataforma)
     suspend fun salvarConta(conta: ContaConectada): Long = contaDao.inserir(conta)
     suspend fun apagarConta(plataforma: String) = contaDao.apagarPorPlataforma(plataforma)
+
+    // Perfil do usuário (v9)
+    fun perfil(): Flow<PerfilUsuario?> = perfilDao.observe()
+    suspend fun perfilNow(): PerfilUsuario? = perfilDao.porId()
+    suspend fun salvarPerfil(p: PerfilUsuario) = perfilDao.salvar(p)
 }
