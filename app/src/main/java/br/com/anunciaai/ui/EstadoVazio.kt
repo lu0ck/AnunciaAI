@@ -40,7 +40,7 @@ fun EstadoVazio(
             icone,
             contentDescription = null,
             modifier = Modifier.size(64.dp),
-            tint = Color(0xFF3F4650) // cinza discreto, minimalista
+            tint = Color(0xFF4B5570) // cinza discreto, minimalista
         )
         Spacer(Modifier.height(16.dp))
         Text(
@@ -65,7 +65,7 @@ fun EstadoVazio(
                     .height(50.dp),
                 shape = RoundedCornerShape(14.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF2E3440), // cinza
+                    containerColor = Color(0xFF1B2440), // cinza
                     contentColor = Color.White
                 )
             ) {

@@ -91,7 +91,7 @@ private fun ConexoesIAEmb() {
             Icon(
                 androidx.compose.material.icons.Icons.Default.AutoAwesome,
                 contentDescription = null,
-                tint = if (provedor != null) br.com.anunciaai.ui.theme.Destaque else Color(0xFF8B909A)
+                tint = if (provedor != null) br.com.anunciaai.ui.theme.Destaque else Color(0xFF8A93AD)
             )
             Spacer(Modifier.width(14.dp))
             Column {
@@ -111,7 +111,7 @@ fun FabCentral(onNavBottom: (String) -> Unit) {
     FloatingActionButton(
         onClick = { onNavBottom(Rotas.CAPTURA) },
         containerColor = br.com.anunciaai.ui.theme.Destaque,
-        contentColor = Color(0xFF06231B),
+        contentColor = Color(0xFF12092B),
         shape = androidx.compose.foundation.shape.CircleShape,
         modifier = Modifier.size(58.dp)
     ) {

@@ -100,7 +100,7 @@ private fun ItemDock(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         BadgedBox(badge = {
-            if (badge > 0) Badge(containerColor = Destaque, contentColor = androidx.compose.ui.graphics.Color(0xFF06231B)) {
+            if (badge > 0) Badge(containerColor = Destaque, contentColor = androidx.compose.ui.graphics.Color(0xFF12092B)) {
                 Text(if (badge > 9) "9+" else "$badge")
             }
         }) {

@@ -70,6 +70,10 @@ Kotlin + Jetpack Compose · Room · Retrofit/OkHttp · WebView (`evaluateJavascr
 - (nada — todos os builds passaram)
 
 ## Feito (adicional, depois do build 1)
+- [x] 30/09 — **v10.0 (BUILD 33) — RUPTURA DE DESIGN: "Aurora Tech"** (Lucas: "vc está preso nesse design, muda ele"):
+  - **Paleta NOVA inteira**: fundo **azul-abissal #0A0E1A** (não mais cinza #12151A), superfície azulada **#141B2E**, destaque **índigo elétrico #7C6BFF** (adeus verde-menta #00C896), acento secundário **ciano aurora #4FD8EB**, gradiente do resumo índigo→**violeta profundo #2E1B6B**, textos azulados #EDEFF7/#8A93AD. Containers do tema (primaryContainer/onPrimary etc.) recalculados pro índigo.
+  - **Verificação binária**: as 5 cores novas presentes no dex; as 5 antigas (00C896/12151A/1B1F26/0A5C6E/06231B) **AUSENTES** — troca 100%, zero resíduo. brilhoNeon agora emite glow índigo. versionCode 18 / v10.0, assinatura 5bb25361, nvapi- OK.
+  - Todas as telas herdam automaticamente (cores via tema); hardcoded remanescentes trocados via sed em 10 arquivos.
 - [x] 30/09 — **v9.0 (BUILD 32) — aba Configurações, Perfil completo com redes, badge de chat, dock 5 itens:**
   - **Dock v9**: agora 5 itens — **Início | Vitrine | [entalhe/FAB] | Chat | Config**. "Mensagens" virou "Chat" com **badge de não-lidas** (EstadoInbox StateFlow alimentado pela contagem de perguntas ML; badge "9+" quando >9). Micro-press nos itens (indication=null).
   - **ConfigScreen (nova)**: hub com Perfil, Conexões (absorvidas pra cá), estado da IA e Sobre. Rotas novas CONFIG/CONEXOES/PERFIL_EDIT.
@@ -190,7 +194,7 @@ GRADLE_USER_HOME=$PWD/.gradle-home ANDROID_HOME=$PWD/android-sdk JAVA_HOME=$PWD/
 ```
 
 ## ⚠️ ESTADO ATUAL (30/09 v9 — ler isto primeiro no chat novo)
-- **APK atual: `AnunciaAI-9.0.apk` (versionCode 17, v9.0, 24MB)** na raiz, servidor LAN :8899 NO AR. **NÃO testado no celular**. v9: aba Config (Conexões foram pra lá), Perfil editável (foto/nick/bio/redes no Room DB v4), badge de não-lidas no Chat, dock 5 itens.
+- **APK atual: `AnunciaAI-10.0.apk` (versionCode 18, v10.0 "Aurora Tech", 24MB)** na raiz, servidor LAN :8899 NO AR. **NÃO testado no celular**. v10 = paleta nova inteira (azul-abissal/índigo/ciano); v9: aba Config, Perfil editável c/ redes, badge Chat.
 - Git: tudo commitado e pushado até `f8809cd`. Repo: github.com/lu0ck/AnunciaAI (PÚBLICA).
 - IA: NVIDIA NIM (llama-3.2-11b-vision) FUNCIONAL — chave em local.properties, testada E2E (JSON no contrato novo: titulo/descricao/categoria_sugerida com taxonomia ' > '/preco_sugerido/preco_comparativo_mercado/condicao estrita em 4 valores).
 - Design atual: tema escuro #12151A/#1B1F26, destaque única #00C896, Manrope estática (5 pesos), badges quadrados com cor de marca, dock BottomAppBar+NotchShape com FAB central, neon glassmorphism (brilhoNeon), Vitrine grid 2 colunas com entrada escalonada, câmera imersiva CameraX com scanner EAN (ML Kit).

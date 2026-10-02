@@ -320,12 +320,12 @@ fun RevisaoScreen(
                     shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Destaque,
-                        contentColor = androidx.compose.ui.graphics.Color(0xFF06231B)
+                        contentColor = androidx.compose.ui.graphics.Color(0xFF12092B)
                     )
                 ) {
                     if (gerando) {
                         CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp,
-                            color = androidx.compose.ui.graphics.Color(0xFF06231B))
+                            color = androidx.compose.ui.graphics.Color(0xFF12092B))
                         Spacer(Modifier.width(10.dp))
                         Text("Gerando anúncio...", style = MaterialTheme.typography.titleMedium)
                     } else {
@@ -398,7 +398,7 @@ fun RevisaoScreen(
                     shape = MaterialTheme.shapes.medium,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Destaque,
-                        contentColor = androidx.compose.ui.graphics.Color(0xFF06231B)
+                        contentColor = androidx.compose.ui.graphics.Color(0xFF12092B)
                     )
                 ) {
                     Text(if (publicando) "Publicando..." else "Publicar",

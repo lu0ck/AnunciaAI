@@ -17,15 +17,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import br.com.anunciaai.R
 
-// ── Sistema de design v3 (spec 29/09): tema escuro como base, UMA cor de destaque ──
-// Nenhum elemento usa cor própria: destaque só em CTA, aba ativa, ícone conectado, status positivo.
-val Destaque = Color(0xFF00C896)      // verde-menta
-val CorFundo = Color(0xFF12151A)      // fundo base
-val CorSuperficie = Color(0xFF1B1F26) // superfície elevada (cards, barra) — UM tom acima do fundo
-val CorTexto = Color(0xFFF2F2F0)      // texto principal
-val CorTextoSec = Color(0xFF8B909A)   // texto secundário/legenda
-val CorNeutro = Color(0xFF4B505B)     // status neutro (desconectado, pendente)
-val CorErro = Color(0xFFFF5470)       // erro
+// ── Sistema de design v10 "AURORA TECH": azul-abissal + índigo elétrico ──
+// Ruptura total com o verde-menta/cinza anterior a pedido do Lucas.
+val Destaque = Color(0xFF7C6BFF)      // índigo elétrico
+val DestaqueCiano = Color(0xFF4FD8EB) // ciano aurora (links/acentos secundários)
+val CorFundo = Color(0xFF0A0E1A)      // azul profundo (não cinza!)
+val CorSuperficie = Color(0xFF141B2E) // superfície azulada
+val CorTexto = Color(0xFFEDEFF7)      // texto com leve azul
+val CorTextoSec = Color(0xFF8A93AD)   // secundário azulado
+val CorNeutro = Color(0xFF4B5570)     // neutro azulado
+val CorErro = Color(0xFFFF5470)
 
 // Cores de marca REAIS (v4) — badge de cada plataforma em toda a lista, Mensagens e selos "publicado em"
 val CorPlataforma = mapOf(
@@ -42,20 +43,20 @@ val CorTextoMarca = mapOf(
     "MERCADO_LIVRE" to Color(0xFF2D3277)
 )
 
-// Fim do gradiente do card de resumo (#00C896 → #0A5C6E)
-val Petroleo = Color(0xFF0A5C6E)
+// Fim do gradiente do card de resumo (índigo → violeta profundo)
+val Petroleo = Color(0xFF2E1B6B)
 
 private val EsquemaEscuro = darkColorScheme(
     primary = Destaque,
-    onPrimary = Color(0xFF06231B),
-    primaryContainer = Color(0xFF0E3D30),
+    onPrimary = Color(0xFF12092B),
+    primaryContainer = Color(0xFF3A2E8C),
     onPrimaryContainer = Destaque,
     secondary = Destaque,
-    onSecondary = Color(0xFF06231B),
-    secondaryContainer = Color(0xFF0E3D30),
+    onSecondary = Color(0xFF12092B),
+    secondaryContainer = Color(0xFF3A2E8C),
     onSecondaryContainer = Destaque,
     tertiary = Destaque,
-    onTertiary = Color(0xFF06231B),
+    onTertiary = Color(0xFF12092B),
     background = CorFundo,
     onBackground = CorTexto,
     surface = CorFundo,
@@ -78,15 +79,15 @@ private val EsquemaEscuro = darkColorScheme(
 // Tema claro recebe a MESMA identidade (o app é escuro por design — não há "modo claro" visual)
 private val EsquemaClaro = lightColorScheme(
     primary = Destaque,
-    onPrimary = Color(0xFF06231B),
-    primaryContainer = Color(0xFF0E3D30),
+    onPrimary = Color(0xFF12092B),
+    primaryContainer = Color(0xFF3A2E8C),
     onPrimaryContainer = Destaque,
     secondary = Destaque,
-    onSecondary = Color(0xFF06231B),
-    secondaryContainer = Color(0xFF0E3D30),
+    onSecondary = Color(0xFF12092B),
+    secondaryContainer = Color(0xFF3A2E8C),
     onSecondaryContainer = Destaque,
     tertiary = Destaque,
-    onTertiary = Color(0xFF06231B),
+    onTertiary = Color(0xFF12092B),
     background = CorFundo,
     onBackground = CorTexto,
     surface = CorFundo,

@@ -123,7 +123,7 @@ fun VitrineScreen(
                                     "R$ ${"%.2f".format(item.precoFinal.takeIf { it > 0 } ?: item.precoSugerido)}",
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.ExtraBold,
-                                    color = Color(0xFFF2F2F0)
+                                    color = Color(0xFFEDEFF7)
                                 )
                             }
                         }

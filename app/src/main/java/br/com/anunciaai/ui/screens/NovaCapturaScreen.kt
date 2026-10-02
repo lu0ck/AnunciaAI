@@ -204,7 +204,7 @@ fun NovaCapturaScreen(
                 Text(
                     "EAN $ean ✓",
                     Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
-                    color = Color(0xFF06231B),
+                    color = Color(0xFF12092B),
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Bold
                 )
@@ -256,7 +256,7 @@ fun NovaCapturaScreen(
                     Icon(
                         Icons.Default.QrCodeScanner,
                         contentDescription = "Ler Código de Barras (EAN)",
-                        tint = if (escanerAtivo) Color(0xFF06231B) else Color.White,
+                        tint = if (escanerAtivo) Color(0xFF12092B) else Color.White,
                         modifier = Modifier.size(22.dp)
                     )
                 }
@@ -439,12 +439,12 @@ private fun BalaoDica() {
                     "Fotografe o item",
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF12151A)
+                    color = Color(0xFF0A0E1A)
                 )
                 Text(
                     "A IA fará a avaliação e a precificação",
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color(0xFF4B505B)
+                    color = Color(0xFF4B5570)
                 )
             }
             // seta do balão (triângulo branco logo abaixo do corpo, centralizada)

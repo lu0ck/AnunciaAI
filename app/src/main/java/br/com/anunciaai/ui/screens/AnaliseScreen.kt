@@ -179,7 +179,7 @@ fun AnaliseScreen(
                     modifier = Modifier.fillMaxWidth().height(54.dp),
                     shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Destaque, contentColor = Color(0xFF06231B)
+                        containerColor = Destaque, contentColor = Color(0xFF12092B)
                     )
                 ) {
                     Text("Ver anúncio", style = MaterialTheme.typography.titleMedium)

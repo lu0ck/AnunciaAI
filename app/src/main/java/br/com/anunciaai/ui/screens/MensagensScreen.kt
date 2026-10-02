@@ -147,8 +147,8 @@ fun MensagensScreen(onNavBottom: (String) -> Unit = {}) {
                         onClick = { filtro = f },
                         shape = CircleShape,
                         colors = androidx.compose.material3.FilterChipDefaults.filterChipColors(
-                            containerColor = androidx.compose.ui.graphics.Color(0xFF23272E), // cinza-escuro
-                            labelColor = androidx.compose.ui.graphics.Color(0xFFF2F2F0),
+                            containerColor = androidx.compose.ui.graphics.Color(0xFF1B2440), // cinza-escuro
+                            labelColor = androidx.compose.ui.graphics.Color(0xFFEDEFF7),
                             selectedContainerColor = Destaque,          // azul/verde-destaque
                             selectedLabelColor = androidx.compose.ui.graphics.Color.White
                         ),

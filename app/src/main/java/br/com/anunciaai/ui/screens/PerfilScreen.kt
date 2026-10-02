@@ -121,7 +121,7 @@ fun PerfilScreen(
                         galeria.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
                     },
                     containerColor = Destaque,
-                    contentColor = Color(0xFF06231B),
+                    contentColor = Color(0xFF12092B),
                     shape = CircleShape,
                     modifier = Modifier.size(40.dp)
                 ) {
@@ -160,7 +160,7 @@ fun PerfilScreen(
                 onClick = { salvar() },
                 modifier = Modifier.fillMaxWidth().height(52.dp),
                 shape = RoundedCornerShape(14.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Destaque, contentColor = Color(0xFF06231B))
+                colors = ButtonDefaults.buttonColors(containerColor = Destaque, contentColor = Color(0xFF12092B))
             ) { Text("Salvar perfil", style = MaterialTheme.typography.titleMedium) }
 
             androidx.compose.animation.AnimatedVisibility(visible = salvo) {

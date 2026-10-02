@@ -207,13 +207,13 @@ fun ListaItensScreen(
                                             if (pct >= 0) Icons.Default.TrendingUp else Icons.Default.TrendingDown,
                                             contentDescription = null,
                                             Modifier.size(14.dp),
-                                            tint = if (pct >= 0) Color(0xFF00A97A) else Color(0xFFFF5470)
+                                            tint = if (pct >= 0) Color(0xFF4FD8EB) else Color(0xFFFF5470)
                                         )
                                         Spacer(Modifier.width(2.dp))
                                         Text(
                                             "${if (pct >= 0) "+" else ""}$pct%",
                                             style = MaterialTheme.typography.labelSmall,
-                                            color = if (pct >= 0) Color(0xFF00A97A) else Color(0xFFFF5470)
+                                            color = if (pct >= 0) Color(0xFF4FD8EB) else Color(0xFFFF5470)
                                         )
                                     }
                                 }
@@ -308,7 +308,7 @@ private fun CardRecente(
                     "R$ ${"%.2f".format(item.precoFinal.takeIf { it > 0 } ?: item.precoSugerido)}",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.ExtraBold,
-                    color = androidx.compose.ui.graphics.Color(0xFFF2F2F0) // branco (linha 2)
+                    color = androidx.compose.ui.graphics.Color(0xFFEDEFF7) // branco (linha 2)
                 )
             }
         }
