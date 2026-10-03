@@ -40,10 +40,12 @@ import kotlinx.serialization.json.JsonPrimitive
 class LoginWebViewActivity : ComponentActivity() {
 
     companion object {
-        // Chrome Android real, atual (o UA default do WebView contém "; wv" e é bloqueado)
+        // Chrome Android real, ATUALIZADO v11.1 (fix #5): o UA default do WebView
+        // contém "; wv" e é bloqueado por anti-bot (OLX). Aplicado em
+        // configurarWebView() ANTES de qualquer loadUrl().
         private const val UA_CHROME =
-            "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 " +
-                "(KHTML, like Gecko) Chrome/129.0.0.0 Mobile Safari/537.36"
+            "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 " +
+                "(KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36"
     }
 
     @SuppressLint("SetJavaScriptEnabled")

@@ -14,6 +14,11 @@ data class Item(
     val precoSugerido: Double,
     val precoFinal: Double,
     val precoComparativoMercado: Double = 0.0,
+    // v11.1 (fix #2): a condição da IA agora PERSISTE — antes era descartada na
+    // Análise e a Revisão reconstruía a SugestaoIA sem ela (chip caía em "bom estado").
+    val condicao: String = "",
+    // v11.1 (fix #6): EAN lido pelo scanner persiste no item (robustez do fluxo)
+    val ean: String? = null,
     val dataCriacao: Long = System.currentTimeMillis()
 )
 

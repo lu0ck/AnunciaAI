@@ -32,6 +32,7 @@ import br.com.anunciaai.AnunciaAIApp
 import br.com.anunciaai.dados.FotoItem
 import br.com.anunciaai.oauth.ChavesIA
 import br.com.anunciaai.ia.FabricaIA
+import br.com.anunciaai.ia.gerarComContrato
 import br.com.anunciaai.ia.modelo.SugestaoIA
 import br.com.anunciaai.plataformas.webview.LoginWebViewActivity
 import br.com.anunciaai.publica.OrquestradorDePublicacao
@@ -61,16 +62,31 @@ fun RevisaoScreen(
     val fotos by app.repositorio.fotosDoItem(itemId).collectAsState(initial = emptyList())
     val contas by app.repositorio.contas().collectAsState(initial = emptyList())
 
-    var titulo by remember { mutableStateOf(TextFieldValue("")) }
-    var descricao by remember { mutableStateOf(TextFieldValue("")) }
-    var categoria by remember { mutableStateOf(TextFieldValue("")) }
-    var preco by remember { mutableStateOf(TextFieldValue("")) }
-    var condicao by remember { mutableStateOf("bom estado") }
+    // v11.1 (fix #2): estados inicializados DIRETAMENTE do item persistido (que
+    // já traz a condição exata que a IA devolveu). A chave item?.id reinicia os
+    // campos quando o item chega do Room — nada de valor default que "depois
+    // se sincroniza". condicao vem do campo persistido, não de constante.
+    var titulo by remember(item?.id) { mutableStateOf(TextFieldValue(item?.titulo ?: "")) }
+    var descricao by remember(item?.id) { mutableStateOf(TextFieldValue(item?.descricao ?: "")) }
+    var categoria by remember(item?.id) { mutableStateOf(TextFieldValue(item?.categoria ?: "")) }
+    var preco by remember(item?.id) {
+        mutableStateOf(
+            TextFieldValue(
+                item?.let { it.precoFinal.takeIf { p -> p > 0 } ?: it.precoSugerido }
+                    ?.let { v -> "%.2f".format(v) } ?: ""
+            )
+        )
+    }
+    var condicao by remember(item?.id) {
+        mutableStateOf(
+            item?.condicao?.takeIf { it.isNotBlank() }?.let { SugestaoIA.normalizarCondicao(it) }
+                ?: "bom estado"
+        )
+    }
     var marcadas by remember { mutableStateOf(setOf(Plataforma.MERCADO_LIVRE, Plataforma.OLX)) }
     var gerando by remember { mutableStateOf(false) }
     var publicando by remember { mutableStateOf(false) }
     var erro by remember { mutableStateOf<String?>(null) }
-    var preenchidoOnce by remember { mutableStateOf(false) }
 
     fun preencher(s: SugestaoIA) {
         titulo = TextFieldValue(s.titulo)
@@ -101,7 +117,8 @@ fun RevisaoScreen(
                 if (bytes.isEmpty()) {
                     erro = "Não consegui ler as fotos."
                 } else {
-                    servico.gerarAnuncioMulti(bytes)
+                    // v11.1 (fix #3): re-tenta quando a condicao vier fora das 4 exatas
+                    servico.gerarComContrato(bytes)
                         .onSuccess { s -> preencher(s) }
                         .onFailure { e -> erro = "IA: ${e.message}" }
                 }
@@ -112,20 +129,8 @@ fun RevisaoScreen(
         }
     }
 
-    LaunchedEffect(item?.id, fotos.size) {
-        val it = item
-        if (it != null && !preenchidoOnce && fotos.isNotEmpty()) {
-            preenchidoOnce = true
-            if (it.titulo.isBlank()) gerarComIA()
-            else preencher(
-                SugestaoIA(
-                    titulo = it.titulo, descricao = it.descricao,
-                    categoria_sugerida = it.categoria,
-                    precoSugeridoReais = it.precoFinal.takeIf { p -> p > 0 } ?: it.precoSugerido
-                )
-            )
-        }
-    }
+    // v11.1: o LaunchedEffect de auto-preenchimento FOI REMOVIDO — os campos já
+    // nascem preenchidos do item persistido (fix #2). A IA só roda no botão.
 
     fun publicar() {
         val it = item ?: return
@@ -144,7 +149,9 @@ fun RevisaoScreen(
                         descricao = descricao.text.trim(),
                         categoria = categoria.text.trim(),
                         precoSugerido = if (it.precoSugerido <= 0) precoNum else it.precoSugerido,
-                        precoFinal = precoNum
+                        precoFinal = precoNum,
+                        // v11.1 (fix #2): a condição escolhida também persiste
+                        condicao = condicao
                     )
                 )
 

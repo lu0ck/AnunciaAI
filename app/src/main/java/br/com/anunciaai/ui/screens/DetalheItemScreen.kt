@@ -78,6 +78,11 @@ fun DetalheItemScreen(itemId: Long, onVoltar: () -> Unit) {
                         Text(it.categoria, style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
+                    // v11.1 (fix #2): condição da IA agora visível no detalhe também
+                    if (it.condicao.isNotBlank()) {
+                        Text("Condição: ${it.condicao}", style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
                     Spacer(Modifier.height(10.dp))
                     Text(it.descricao.ifEmpty { "(sem descrição)" }, style = MaterialTheme.typography.bodyMedium)
 

@@ -224,6 +224,14 @@ class NvidiaVLService(
             - "bom estado" (usado, com marcas leves de uso)
             - "marcas de uso" (usado, com desgaste/defeitos visíveis)
 
+            REGRAS ANTI-CONTRADIÇÃO (v11.1):
+            - NUNCA descreva o mesmo produto com atributos tecnicamente contraditórios
+              (ex.: com fio E sem fio, novo E usado, sem defeito E com defeito).
+            - Se não tiver certeza de um atributo específico (conectividade, voltagem,
+              acessórios inclusos), OMITA-o da descrição em vez de arriscar contradição.
+            - A descrição deve ser coerente com a "condicao" escolhida: se "novo", não
+              mencione sinais de uso; se "marcas de uso", não diga "como novo".
+
             Baseie os preços em produtos semelhantes usados/seminovos no mercado brasileiro.
             Se não conseguir identificar o produto com confiança, retorne "titulo": "PRODUTO NÃO IDENTIFICADO" e os demais campos vazios ou zero.
         """.trimIndent()

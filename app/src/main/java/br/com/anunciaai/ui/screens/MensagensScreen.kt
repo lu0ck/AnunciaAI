@@ -8,7 +8,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.Chat
 import androidx.compose.material.icons.outlined.Mail
 import androidx.compose.material3.*
@@ -130,9 +129,8 @@ fun MensagensScreen(onNavBottom: (String) -> Unit = {}) {
 
     Scaffold(
         topBar = { TopAppBar(title = { Text("Mensagens") }) },
-        bottomBar = { BarraDockComBadge(Rotas.MENSAGENS, onNavBottom) },
-        floatingActionButton = { FabCentral(onNavBottom) },
-        floatingActionButtonPosition = FabPosition.Center
+        bottomBar = { BarraDockComBadge(Rotas.MENSAGENS, onNavBottom) }
+        // v11.1: FAB duplicado EXTINTO — o "+" vive UMA vez, integrado na cápsula (BarraDockNova).
     ) { pad ->
         Column(Modifier.padding(pad).fillMaxSize()) {
             // ── Pills de filtro (ITEM 2) ──

@@ -10,7 +10,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.PhotoCamera
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -30,7 +29,6 @@ import br.com.anunciaai.ui.IconePlataforma
 import br.com.anunciaai.ui.Rotas
 import br.com.anunciaai.ui.foto.FotoPrimeira
 import br.com.anunciaai.ui.theme.Destaque
-import br.com.anunciaai.ui.theme.brilhoNeon
 import kotlinx.coroutines.delay
 
 /**
@@ -50,9 +48,8 @@ fun VitrineScreen(
 
     Scaffold(
         topBar = { TopAppBar(title = { Text("Vitrine") }) },
-        bottomBar = { BarraDockComBadge(Rotas.VITRINE, onNavBottom) },
-        floatingActionButton = { FabCentral(onNavBottom) },
-        floatingActionButtonPosition = FabPosition.Center
+        bottomBar = { BarraDockComBadge(Rotas.VITRINE, onNavBottom) }
+        // v11.1: FAB duplicado EXTINTO — o "+" vive UMA vez, integrado na cápsula (BarraDockNova).
     ) { pad ->
         if (itens.isEmpty()) {
             Box(Modifier.padding(pad).fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -121,12 +118,26 @@ fun VitrineScreen(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     maxLines = 1, overflow = TextOverflow.Ellipsis
                                 )
-                                Text(
-                                    "R$ ${"%.2f".format(item.precoFinal.takeIf { it > 0 } ?: item.precoSugerido)}",
-                                    style = MaterialTheme.typography.headlineSmall, // v11: preço GIGANTE
-                                    fontWeight = FontWeight.ExtraBold,
-                                    color = androidx.compose.ui.graphics.Color(0xFF17171F)
-                                )
+                                // v11.1 (fix #4): categoria + preço na MESMA linha, mesma
+                                // altura: categoria com weight(1f) truncada com reticências;
+                                // preço GIGANTE ExtraBold na cor de texto principal.
+                                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
+                                    Text(
+                                        item.categoria,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    Spacer(Modifier.width(6.dp))
+                                    Text(
+                                        "R$ ${"%.2f".format(item.precoFinal.takeIf { it > 0 } ?: item.precoSugerido)}",
+                                        style = MaterialTheme.typography.headlineSmall, // v11: preço GIGANTE
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = androidx.compose.ui.graphics.Color(0xFF17171F)
+                                    )
+                                }
                             }
                         }
                     }

@@ -5,7 +5,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Person
@@ -33,9 +32,8 @@ fun ConfigScreen(
 ) {
     Scaffold(
         topBar = { TopAppBar(title = { Text("Configurações") }) },
-        bottomBar = { BarraDockComBadge(Rotas.CONFIG, onNavBottom) },
-        floatingActionButton = { FabCentral(onNavBottom) },
-        floatingActionButtonPosition = androidx.compose.material3.FabPosition.Center
+        bottomBar = { BarraDockComBadge(Rotas.CONFIG, onNavBottom) }
+        // v11.1: FAB duplicado EXTINTO — o "+" vive UMA vez, integrado na cápsula (BarraDockNova).
     ) { pad ->
         Column(
             Modifier.padding(pad).fillMaxSize()
@@ -105,16 +103,5 @@ private fun ConexoesIAEmb() {
     }
 }
 
-/** FAB central padrão (reuso nas telas com dock). */
-@Composable
-fun FabCentral(onNavBottom: (String) -> Unit) {
-    FloatingActionButton(
-        onClick = { onNavBottom(Rotas.CAPTURA) },
-        containerColor = br.com.anunciaai.ui.theme.Destaque,
-        contentColor = Color(0xFF12092B),
-        shape = androidx.compose.foundation.shape.CircleShape,
-        modifier = Modifier.size(58.dp)
-    ) {
-        Icon(androidx.compose.material.icons.Icons.Default.Add, contentDescription = "Vender")
-    }
-}
+// v11.1: FabCentral EXTINTO — o "+" único vive integrado na cápsula flutuante
+// (BarraDockNova.CapsulaFlutuante). Nenhum Scaffold declara floatingActionButton.

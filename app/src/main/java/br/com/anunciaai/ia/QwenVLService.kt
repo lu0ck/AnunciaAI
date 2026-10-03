@@ -126,10 +126,20 @@ class QwenVLService(private val apiKey: String) : ServicoDeIA {
             {
               "titulo": "string, até 60 caracteres, no estilo usado em anúncios de marketplace",
               "descricao": "string, 2 a 4 frases, destacando estado de conservação aparente e principais características, mencionando defeitos visíveis",
-              "categoria_sugerida": "string",
-              "preco_sugerido_reais": number,
-              "condicao": "novo" | "usado - como novo" | "usado - bom estado" | "usado - com marcas de uso"
+              "categoria_sugerida": "taxonomia EXATA com os níveis separados por ' > ', do departamento ao tipo específico (exemplo: 'Eletrônicos > Hardware > Periféricos > Mouses'). Use no máximo 4 níveis, baseada na taxonomia de marketplaces brasileiros (Mercado Livre/OLX).",
+              "preco_sugerido": 0.00,
+              "preco_comparativo_mercado": 0.00,
+              "condicao": "novo"
             }
+
+            REGRAS DA CONDIÇÃO — a chave "condicao" DEVE retornar EXCLUSIVAMENTE uma destas 4 strings, nada mais:
+            - "novo" | "como novo" | "bom estado" | "marcas de uso"
+
+            REGRAS ANTI-CONTRADIÇÃO:
+            - NUNCA descreva o mesmo produto com atributos tecnicamente contraditórios
+              (ex.: com fio E sem fio, novo E usado). Se não tiver certeza de um
+              atributo específico, OMITA-o da descrição em vez de arriscar contradição.
+            - A descrição deve ser coerente com a "condicao" escolhida.
 
             Baseie o preço sugerido em produtos semelhantes usados/seminovos no mercado brasileiro. Se não conseguir identificar o produto com confiança, retorne "titulo": "PRODUTO NÃO IDENTIFICADO" e os demais campos vazios.
         """.trimIndent()

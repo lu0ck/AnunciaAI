@@ -6,14 +6,10 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.TrendingDown
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material.icons.outlined.Inventory2
@@ -37,7 +33,6 @@ import br.com.anunciaai.ui.Rotas
 import br.com.anunciaai.ui.foto.FotoPrimeira
 import br.com.anunciaai.ui.theme.Destaque
 import br.com.anunciaai.ui.theme.Petroleo
-import br.com.anunciaai.ui.theme.brilhoNeon
 
 /**
  * Início (PASSO 1 — dashboard VendeAi):
@@ -111,23 +106,21 @@ fun ListaItensScreen(
                 }
             )
         },
-        bottomBar = { BarraDockComBadge(Rotas.LISTA, onNavBottom) },
-        // v6.1: FAB "Vender" CENTRAL ancorado pelo Scaffold sobre o vão do dock.
-        // (O FAB antigo do canto foi removido — PASSO 1.)
-        floatingActionButton = { FabCentral(onNavBottom) },
-        floatingActionButtonPosition = FabPosition.Center
+        bottomBar = { BarraDockComBadge(Rotas.LISTA, onNavBottom) }
+        // v11.1: FAB duplicado EXTINTO — o "+" vive UMA vez, integrado na cápsula (BarraDockNova).
     ) { pad ->
         LazyColumn(
             Modifier.padding(pad).fillMaxSize(),
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            // ── Card de resumo: gradiente + brilho glossy + GLOW NEON (PILAR 2) ──
+            // ── Card de resumo: gradiente + brilho glossy ──
+            // v11.1 (fix #4): brilhoNeon (círculos desfocados) REMOVIDO — não
+            // estava especificado e dava cara de template genérico.
             item {
                 Box(
                     Modifier
                         .fillMaxWidth()
-                        .brilhoNeon() // PILAR 2: glow verde-menta 10% por trás
                         .clip(RoundedCornerShape(20.dp))
                         .background(Brush.linearGradient(listOf(Destaque, Petroleo)))
                 ) {
@@ -235,8 +228,12 @@ fun ListaItensScreen(
                 Text("Itens recentes", style = MaterialTheme.typography.titleMedium)
                 Spacer(Modifier.height(10.dp))
             }
-            item {
-                if (itens.isEmpty()) {
+            // ── Vitrine: GRID de 2 colunas (ITEM 4) — v11.1: grid aninhado em
+            // LazyColumn era o bug (card espremido à esquerda). Agora as linhas
+            // do grid são itens do próprio LazyColumn via chunked(2): sem
+            // aninhamento de listas roláveis, sem altura calculada na mão. ──
+            if (itens.isEmpty()) {
+                item {
                     Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                         br.com.anunciaai.ui.EstadoVazio(
                             icone = androidx.compose.material.icons.Icons.Outlined.Inventory2,
@@ -246,20 +243,28 @@ fun ListaItensScreen(
                             onBotao = onNovoItem
                         )
                     }
-                } else {
-                    val ordenados = itens.sortedByDescending { it.dataCriacao }
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(2),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                        modifier = Modifier.height(((ordenados.size + 1) / 2 * 260).dp)
-                    ) {
-                        items(ordenados, key = { "it_${it.id}" }) { item ->
-                            CardRecente(
-                                item = item,
-                                plataformas = pubs.filter { it.itemId == item.id }.map { it.plataforma },
-                                onClick = { onAbrirItem(item.id) }
-                            )
+                }
+            } else {
+                val ordenadosRecentes = itens.sortedByDescending { it.dataCriacao }
+                val linhasGrid = ordenadosRecentes.chunked(2)
+                linhasGrid.forEach { linha ->
+                    item(key = "grid_${linha.first().id}") {
+                        Row(
+                            Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            linha.forEach { itemCard ->
+                                Box(Modifier.weight(1f)) {
+                                    CardRecente(
+                                        item = itemCard,
+                                        plataformas = pubs.filter { it.itemId == itemCard.id }.map { it.plataforma },
+                                        onClick = { onAbrirItem(itemCard.id) }
+                                    )
+                                }
+                            }
+                            // célula fantasma quando a última linha tem 1 item (mantém a
+                            // coluna ocupada sem esticar o card único pra largura toda)
+                            if (linha.size == 1) Spacer(Modifier.weight(1f))
                         }
                     }
                 }
@@ -304,12 +309,27 @@ private fun CardRecente(
                     maxLines = 1, overflow = TextOverflow.Ellipsis
                 )
                 Spacer(Modifier.height(2.dp))
-                Text(
-                    "R$ ${"%.2f".format(item.precoFinal.takeIf { it > 0 } ?: item.precoSugerido)}",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = androidx.compose.ui.graphics.Color(0xFFEDEFF7) // branco (linha 2)
-                )
+                // v11.1 (fix #4): categoria + preço lado a lado, MESMA altura,
+                // categoria truncada com reticências (não quebra linha);
+                // preço na COR DE TEXTO PRINCIPAL peso 800 — é a informação mais
+                // importante do card, nunca cinza/secundária.
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
+                    Text(
+                        item.categoria,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        "R$ ${"%.2f".format(item.precoFinal.takeIf { it > 0 } ?: item.precoSugerido)}",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = br.com.anunciaai.ui.theme.CorTexto // texto principal, não cinza
+                    )
+                }
             }
         }
     }

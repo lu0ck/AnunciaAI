@@ -23,3 +23,28 @@ interface ServicoDeIA {
         codigoEan: String
     ): Result<SugestaoIA> = gerarAnuncioMulti(fotosJpeg) // padrão: ignora o EAN
 }
+
+/**
+ * v11.1 (fix #3): wrapper com RETRY quando a IA devolve a "condicao" fora das
+ * 4 strings exatas ("novo"/"como novo"/"bom estado"/"marcas de uso"). Qualquer
+ * resposta fora do contrato é tratada como erro de parsing e a chamada é
+ * re-tentada (1 vez a mais) com instrução de correção antes de desistir.
+ */
+suspend fun ServicoDeIA.gerarComContrato(
+    fotos: List<ByteArray>,
+    ean: String? = null,
+    tentativas: Int = 2
+): Result<SugestaoIA> {
+    var ultimoErro: Exception? = null
+    repeat(tentativas) { indice ->
+        val r = if (ean.isNullOrBlank()) gerarAnuncioMulti(fotos) else gerarAnuncioComEan(fotos, ean)
+        r.onSuccess { s ->
+            if (s.condicao in SugestaoIA.CONDICOES) return Result.success(s)
+            // fora do contrato → erro de parsing, re-tenta
+            ultimoErro = Exception(
+                "condicao \"${s.condicao}\" fora do contrato (esperado: ${SugestaoIA.CONDICOES})"
+            )
+        }.onFailure { ultimoErro = it as? Exception ?: Exception(it.message) }
+    }
+    return Result.failure(ultimoErro ?: Exception("IA não devolveu contrato válido"))
+}

@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.statusBarsPadding
 import br.com.anunciaai.AnunciaAIApp
 import br.com.anunciaai.ia.FabricaIA
+import br.com.anunciaai.ia.gerarComContrato
 import br.com.anunciaai.ui.foto.FotoUtil
 import br.com.anunciaai.ui.theme.Destaque
 import kotlinx.coroutines.delay
@@ -84,20 +85,29 @@ fun AnaliseScreen(
             return@LaunchedEffect
         }
         // PILAR 4: com EAN lido, a IA recebe o código exato do produto
-        val resultado = if (!ean.isNullOrBlank())
-            servico.gerarAnuncioComEan(fotosBytes, ean)
-        else
-            servico.gerarAnuncioMulti(fotosBytes)
+        // v11.1 (fix #3): gerarComContrato re-tenta quando a condicao vier fora das 4 exatas
+        val resultado = servico.gerarComContrato(
+            fotos = fotosBytes,
+            ean = ean.takeIf { !it.isNullOrBlank() }
+        )
         resultado
             .onSuccess { s ->
-                item?.let { atual ->
+                // v11.1 (fix #2): leitura DIRETA (suspend) em vez do estado do Flow —
+                // se o Room ainda não tivesse emitido quando a IA respondesse, o
+                // save era PULADO e a condição (e tudo mais) se perdia.
+                val atual = item ?: app.repositorio.itemNow(itemId)
+                if (atual != null) {
                     app.repositorio.salvarItem(
                         atual.copy(
                             titulo = s.titulo,
                             descricao = s.descricao,
                             categoria = s.categoria_sugerida,
                             precoSugerido = s.melhorPreco,
-                            precoComparativoMercado = s.precoComparativoMercado
+                            precoComparativoMercado = s.precoComparativoMercado,
+                            // v11.1 (fix #2): condição da IA PERSISTE no item — a Revisão
+                            // agora lê o valor exato daqui (chip certo já vem marcado).
+                            condicao = s.condicaoNormalizada,
+                            ean = ean
                         )
                     )
                 }
