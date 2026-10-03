@@ -70,6 +70,14 @@ Kotlin + Jetpack Compose · Room · Retrofit/OkHttp · WebView (`evaluateJavascr
 - (nada — todos os builds passaram)
 
 ## Feito (adicional, depois do build 1)
+- [x] 03/10 — **v11.1 (BUILD 35) — PACOTE DE CORREÇÕES DEFINITIVAS (6 fixes do prompt do Lucas):**
+  - **FIX 1 (FAB duplicado — bug de arquitetura)**: confirmado no código — a cápsula já tinha o "+" lime integrado E cada Scaffold redeclarava `floatingActionButton = { FabCentral() }` = dois "+" sobrepostos em 4 telas. Corrigido: `FabCentral` EXTINTO (função removida, 0 usos), `floatingActionButton`/`FabPosition` removidos dos 4 Scaffolds (Lista/Vitrine/Mensagens/Config). O "+" agora existe UMA vez, integrado na cápsula (BarraDockNova). **Glass**: fundo translúcido 69% + `Modifier.blur(16.dp)` na camada de fundo (API 31+; fallback 94% opaco sem blur no <31) + sombra 6dp no círculo lime. Bônus: na v11 a sombra da cápsula vinha DEPOIS do clip (invisível) — corrigido.
+  - **FIX 2 (condição da IA desconectada da UI)**: causa raiz era MAIS FUNDA — a entidade `Item` NÃO TINHA campo `condicao`; a AnaliseScreen salvava título/preço/categoria e DESCARTAVA a condição; a Revisão reconstruía a SugestaoIA sem ela → chip caía sempre em "bom estado". Corrigido em 3 camadas: (a) DB **v5**: `Item` ganha `condicao` + `ean`; (b) AnaliseScreen persiste `s.condicaoNormalizada` no item (e leitura via `itemNow()` — antes o save era PULADO se o Flow do Room ainda não tivesse emitido); (c) RevisaoScreen inicializa os estados DIRETAMENTE do item persistido via `remember(item?.id)` — `condicao = item.condicao normalizada`, nunca constante. LaunchedEffect de auto-preenchimento removido (era a fonte da dessincronia). `publicar()` também persiste a condição editada. Detalhe mostra "Condição: X".
+  - **FIX 3 (prompt contraditório)**: PROMPT_MULTI (NVIDIA, usado também pelo Gemini) + PROMPT_SISTEMA (Qwen) ganham REGRAS ANTI-CONTRADIÇÃO ("nunca atributos tecnicamente contraditórios; se incerto, OMITA o atributo; descrição coerente com a condição") + contrato das 4 strings exatas. Qwen alinhado ao contrato novo (taxonomia ' > ', preco_sugerido + comparativo). NOVO: `ServicoDeIA.gerarComContrato()` — wrapper com RETRY (2 tentativas) quando a condicao vem fora das 4 exatas; usado na Análise e na Revisão. **4 testes unitários (ContratoCondicaoTest): PASS** — inclui "IA devolve 'novo' → chip 'novo' atravessa íntegro" e "IA erra → retry devolve contrato válido".
+  - **FIX 4 (vitrine quebrada + contraste)**: causa raiz do card espremido = `LazyVerticalGrid` ANINHADO dentro de `item {}` do LazyColumn (Home) com altura calculada na mão. Corrigido: linhas do grid viram itens do próprio LazyColumn via `chunked(2)` + `Row(weight(1f))` por célula + célula fantasma na linha ímpar. Preço: `#EDEFF7` (branco da v10 sobre card BRANCO = invisível) → `CorTexto #17171F` peso 800 na Home; na Vitrine preço gigante + categoria em Row com `weight(1f)`, `maxLines=1`, `Ellipsis` (não quebra mais linha). `brilhoNeon` (círculos desfocados) REMOVIDO da Home e da Vitrine (0 usos restantes).
+  - **FIX 5 (OLX/UA)**: UA Chrome atualizado 129 → **141** (Pixel 8/Android 14), aplicado em `configurarWebView()` antes de qualquer `loadUrl` (ordem já correta confirmada).
+  - **FIX 6 (scanner EAN)**: já funcionava desde a v8 (scanner ML Kit → rota `?ean=` → PROMPT_EAN na IA); agora o EAN também PERSISTE no Item (DB v5) — o dado não se perde se o app morrer entre captura e análise.
+  - **Verificação binária (AnunciaAI-11.1.apk)**: versionCode 20 / v11.1; strings do retry ("fora do contrato"), anti-contradição, UA Chrome/141, grid e EAN presentes no dex; `FabCentral` AUSENTE do mapping.txt (um único "+" comprovado); assinatura 5bb25361 (mesma). APK 24MB.
 - [x] 30/09 — **v11.0 (BUILD 34) — REBOOT VISUAL "Figma Bike Shop"** (Lucas rejeitou a v10: "só mudou a cor pra roxo"):
   - **App agora é CLARO**: fundo #F4F4F7, cards BRANCOS, texto quase-preto #17171F, statusbar clara (SystemBarStyle.light). Adeus tema escuro/índigo — 0 resíduo no dex.
   - **Nav CÁPSULA FLUTUANTE** (Figma): BottomAppBar extinta de vez — cápsula RoundedCornerShape(50%), fundo #1E1E24, sombra 18dp, flutuando com padding 24/16dp. FAB verde-lime #A3E635 INTEGRADO no centro (52dp, maior que os itens), sem notch.
@@ -200,18 +208,18 @@ GRADLE_USER_HOME=$PWD/.gradle-home ANDROID_HOME=$PWD/android-sdk JAVA_HOME=$PWD/
 GRADLE_USER_HOME=$PWD/.gradle-home ANDROID_HOME=$PWD/android-sdk JAVA_HOME=$PWD/jdk-17.0.20.1+1 ./gradle-8.10.2/bin/gradle assembleRelease --console=plain
 ```
 
-## ⚠️ ESTADO ATUAL (30/09 v9 — ler isto primeiro no chat novo)
-- **APK atual: `AnunciaAI-11.0.apk` (versionCode 19, v11.0 REBOOT claro/bike, 24MB)** na raiz, servidor :8899 NO AR. **NÃO testado**. v11: app claro, cápsula flutuante, cards brancos 24dp, chips pílula lime.
-- Git: tudo commitado e pushado até `f8809cd`. Repo: github.com/lu0ck/AnunciaAI (PÚBLICA).
-- IA: NVIDIA NIM (llama-3.2-11b-vision) FUNCIONAL — chave em local.properties, testada E2E (JSON no contrato novo: titulo/descricao/categoria_sugerida com taxonomia ' > '/preco_sugerido/preco_comparativo_mercado/condicao estrita em 4 valores).
-- Design atual: tema escuro #12151A/#1B1F26, destaque única #00C896, Manrope estática (5 pesos), badges quadrados com cor de marca, dock BottomAppBar+NotchShape com FAB central, neon glassmorphism (brilhoNeon), Vitrine grid 2 colunas com entrada escalonada, câmera imersiva CameraX com scanner EAN (ML Kit).
-- **Convite ao chat novo**: este chat atingiu 3.573 KB (940% do limite 380 KB) — LEVE EM CONTA nas respostas; manter respostas curtas, poupar contexto.
+## ⚠️ ESTADO ATUAL (03/10 v11.1 — ler isto primeiro no chat novo)
+- **APK atual: `AnunciaAI-11.1.apk` (versionCode 20, v11.1, 24MB)** na raiz, servidor :8899 NO AR. **NÃO testado no celular** — 6 fixes do pacote definitivo aguardam prova real no aparelho (FAB único na cápsula com glass, chip de condição batendo com a IA, grid 2 colunas na Home, scanner EAN).
+- Git: tudo commitado e pushado até `c1a2688`. Repo: github.com/lu0ck/AnunciaAI (PÚBLICA).
+- IA: NVIDIA NIM (llama-3.2-11b-vision) FUNCIONAL — chave em local.properties. Contrato v11.1: condicao estrita em 4 valores + REGRAS ANTI-CONTRADIÇÃO + retry automático (gerarComContrato) quando fora do contrato. 4 testes unitários PASS.
+- Design atual: tema claro bike-shop (#F4F4F7/#FFFFFF/#17171F, lime #A3E635), cápsula flutuante GLASS (blur API 31+) com "+" ÚNICO integrado, cards brancos 24dp, chips pílula, grid 2 colunas sem aninhamento (chunked), câmera imersiva CameraX + scanner EAN ML Kit.
+- **Convite ao chat novo**: este chat está crescendo — manter respostas curtas, poupar contexto.
 
 ## Continuação (chat novo → "continuar do progresso.md")
 Novo chat com nome "AnunciaAI" → dizer "continuar do progresso.md". Estado completo acima; comandos de build abaixo.
 
 ## Planejado (próximas tarefas, em ordem)
-- [ ] **TESTAR v8.0 no celular** (prioridade máxima — tudo abaixo depende de bugs reais): FAB encaixa no entalhe do dock? Vitrine com animação de entrada? Análise sem sobreposição + checks animados? Scanner EAN lê código de barras? Câmera imersiva funciona no aparelho?
+- [ ] **TESTAR v11.1 no celular** (prioridade máxima — tudo abaixo depende de bugs reais): "+" único na cápsula (glass no Android 12+)? Chip de condição bate com a resposta da IA (gerar item "novo")? Grid 2 colunas na Home sem card espremido? Preço legível nos cards? Scanner EAN lê código? Câmera imersiva funciona?
 - [ ] Corrigir o que vier do teste (histórico de crashes da v6/v6.1 mostra que câmera/dock precisam de prova real)
 - [ ] Credenciais ML: app no DevCenter (developers.mercadolivre.com.br) → ANUNCIAAI_ML_CLIENT_ID/SECRET no local.properties + redirect br.com.anunciaai://oauth/ml → rebuild → testar OAuth + publicação via API + Mensagens ML
 - [ ] Testar OLX WebView de novo (v8.0 tem onReceivedHttpError + tela amigável + UA Chrome — ver se a OLX agora deixa logar/publicar)
