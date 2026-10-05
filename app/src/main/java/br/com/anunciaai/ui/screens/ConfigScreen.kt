@@ -1,7 +1,15 @@
 package br.com.anunciaai.ui.screens
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
@@ -9,99 +17,127 @@ import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import br.com.anunciaai.ui.BarraDockComBadge
-import br.com.anunciaai.ui.Rotas
-import br.com.anunciaai.ui.theme.CorSuperficie
+import br.com.anunciaai.ui.theme.CorTexto
+import br.com.anunciaai.ui.theme.CorTextoSec
+import br.com.anunciaai.ui.theme.Destaque
 
 /**
- * v9 — Configurações: hub com Perfil, Conexões (absorvidas daqui), IA e Sobre.
+ * CONFIGURAÇÕES (v12.0): hub Perfil/Conexões/IA/Sobre — tema escuro,
+ * linhas com separador (spec: lista simples), SEM FAB (o "+" vive na cápsula raiz).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConfigScreen(
-    onNavBottom: (String) -> Unit = {},
     onAbrirPerfil: () -> Unit = {},
     onAbrirConexoes: () -> Unit = {}
 ) {
-    Scaffold(
-        topBar = { TopAppBar(title = { Text("Configurações") }) },
-        bottomBar = { BarraDockComBadge(Rotas.CONFIG, onNavBottom) }
-        // v11.1: FAB duplicado EXTINTO — o "+" vive UMA vez, integrado na cápsula (BarraDockNova).
-    ) { pad ->
+    Column(Modifier.fillMaxSize()) {
+        TopAppBar(
+            title = { Text("Configurações", style = MaterialTheme.typography.headlineSmall, color = CorTexto) }
+        )
         Column(
-            Modifier.padding(pad).fillMaxSize()
+            Modifier
+                .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp)
         ) {
             Spacer(Modifier.height(8.dp))
-            LinhaConfig(icon = Icons.Default.Person, titulo = "Perfil", sub = "Foto, nome, nick, bio e redes sociais", onClick = onAbrirPerfil)
-            LinhaConfig(icon = Icons.Default.Link, titulo = "Conexões", sub = "Mercado Livre, OLX, Shopee e outras", onClick = onAbrirConexoes)
+            LinhaConfig(Icons.Default.Person, "Perfil", "Foto, nome, nick, bio e redes sociais", onAbrirPerfil)
+            LinhaConfig(Icons.Default.Link, "Conexões", "Mercado Livre, OLX, Shopee e outras", onAbrirConexoes)
             Spacer(Modifier.height(16.dp))
-            // IA (estado embutido, sem navegação)
-            ConexoesIAEmb() // cartão da IA reutilizado (sem interação)
+            ConexoesIAEmb()
             Spacer(Modifier.height(16.dp))
-            LinhaConfig(icon = Icons.Outlined.Info, titulo = "Sobre", sub = "AnunciaAI v${br.com.anunciaai.BuildConfig.VERSION_NAME}", onClick = {})
+            LinhaConfig(Icons.Outlined.Info, "Sobre", "AnunciaAI v${br.com.anunciaai.BuildConfig.VERSION_NAME}", {})
             Spacer(Modifier.height(24.dp))
         }
     }
 }
 
 @Composable
-private fun LinhaConfig(icon: androidx.compose.ui.graphics.vector.ImageVector, titulo: String, sub: String, onClick: () -> Unit) {
+private fun LinhaConfig(
+    icon: ImageVector,
+    titulo: String,
+    sub: String,
+    onClick: () -> Unit
+) {
     Card(
         onClick = onClick,
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = CorSuperficie),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)
     ) {
-        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(icon, contentDescription = null, tint = br.com.anunciaai.ui.theme.Destaque)
+        androidx.compose.foundation.layout.Row(
+            Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(icon, contentDescription = null, tint = Destaque)
             Spacer(Modifier.width(14.dp))
             Column(Modifier.weight(1f)) {
-                Text(titulo, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                Text(sub, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    titulo,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = CorTexto
+                )
+                Text(sub, style = MaterialTheme.typography.bodySmall, color = CorTextoSec)
             }
-            Icon(Icons.AutoMirrored.Filled.ArrowForwardIos, contentDescription = null,
-                modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            Icon(
+                Icons.AutoMirrored.Filled.ArrowForwardIos,
+                contentDescription = null,
+                modifier = Modifier.size(16.dp),
+                tint = CorTextoSec
+            )
         }
     }
 }
 
-/** Cartão do estado da IA (reaproveitado da ConexoesScreen, sem menu). */
+/** Cartão do estado da IA (sem navegação). */
 @Composable
 private fun ConexoesIAEmb() {
     val provedor = br.com.anunciaai.ia.FabricaIA.nomeAtivo()
     Card(
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = CorSuperficie),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
-        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+        androidx.compose.foundation.layout.Row(
+            Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Icon(
-                androidx.compose.material.icons.Icons.Default.AutoAwesome,
+                Icons.Default.AutoAwesome,
                 contentDescription = null,
-                tint = if (provedor != null) br.com.anunciaai.ui.theme.Destaque else Color(0xFF8A93AD)
+                tint = if (provedor != null) Destaque else CorTextoSec
             )
             Spacer(Modifier.width(14.dp))
             Column {
-                Text("Inteligência artificial", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                Text(
+                    "Inteligência artificial",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = CorTexto
+                )
                 Text(
                     if (provedor != null) "Ativa — $provedor" else "Sem chave configurada",
-                    style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant
+                    style = MaterialTheme.typography.bodySmall,
+                    color = CorTextoSec
                 )
             }
         }
     }
 }
-
-// v11.1: FabCentral EXTINTO — o "+" único vive integrado na cápsula flutuante
-// (BarraDockNova.CapsulaFlutuante). Nenhum Scaffold declara floatingActionButton.

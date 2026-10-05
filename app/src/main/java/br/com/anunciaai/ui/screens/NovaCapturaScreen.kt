@@ -12,14 +12,6 @@ import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview as CameraPreview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -34,11 +26,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
@@ -47,23 +35,24 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import br.com.anunciaai.AnunciaAIApp
 import br.com.anunciaai.ui.foto.FotoUtil
+import br.com.anunciaai.ui.theme.CorTexto
+import br.com.anunciaai.ui.theme.CorTextoSec
 import br.com.anunciaai.ui.theme.Destaque
 import kotlinx.coroutines.launch
 import java.io.File
 
 /**
- * Vender (v5.2 — ITEM 1 da spec visual): câmera IMERSIVA full-screen.
- * - Preview CameraX ocupando a tela toda (moldura tracejada removida)
- * - 4 cantoneiras brancas finas de enquadramento no centro
- * - Balão branco com seta pra baixo flutuando acima do botão de captura:
- *   "Fotografe o item" (negrito) / "A IA fará a avaliação e a precificação"
- * - Botão de captura grande + galeria; foto tirada vai direto pra análise da IA
+ * TELA 2 — VENDER / CAPTURA (v12.0, reescrita do zero).
+ * - Moldura de captura com BORDA PONTILHADA, preview de câmera real atrás
+ * - Botão primário "Tirar foto" (sólido #00C896), secundário "Escolher da
+ *   galeria (até 10)" como TEXTO SUBLINHADO (sem pill vazado)
+ * - Tema escuro integral (fundo #12151A em toda parte)
+ * - Scanner EAN (ML Kit) no botão QrCodeScanner — EAN vai junto pra análise
  */
 @Composable
 fun NovaCapturaScreen(
     onVoltar: () -> Unit,
-    onItemCriado: (Long, String?) -> Unit,
-    onNavBottom: (String) -> Unit = {}
+    onItemCriado: (Long, String?) -> Unit
 ) {
     val contexto = LocalContext.current
     val app = contexto.applicationContext as AnunciaAIApp
@@ -76,9 +65,8 @@ fun NovaCapturaScreen(
         )
     }
     var erro by remember { mutableStateOf<String?>(null) }
-    // gatilho de captura registrado pela câmera (hoisted state)
     var gatilhoCaptura by remember { mutableStateOf<(() -> Unit)?>(null) }
-    // PILAR 4: scanner de código de barras (ML Kit) — cliente EAN-13
+    // scanner EAN
     var escanerAtivo by remember { mutableStateOf(false) }
     var eanLido by remember { mutableStateOf<String?>(null) }
     val analisadorEan = remember {
@@ -90,7 +78,7 @@ fun NovaCapturaScreen(
     }
     DisposableEffect(Unit) { onDispose { analisadorEan.close() } }
 
-    // cria o item vazio uma vez; fotos entram na tabela FotoItem
+
     var itemIdAtual by remember { mutableStateOf<Long?>(null) }
     fun itemAtualOuNovo(onPronto: (Long) -> Unit) {
         val atual = itemIdAtual
@@ -147,9 +135,9 @@ fun NovaCapturaScreen(
         }
     }
 
-    Box(Modifier.fillMaxSize().background(Color.Black)) {
+    Box(Modifier.fillMaxSize().background(Color(0xFF12151A))) {
         if (temPermissao) {
-            CameraImersiva(
+            CameraComMoldura(
                 onGatilhoPronto = { gatilhoCaptura = it },
                 onFotoTirada = { arquivo ->
                     FotoUtil.corrigirRotacao(contexto, arquivo)
@@ -173,13 +161,12 @@ fun NovaCapturaScreen(
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(
                     "Precisamos da permissão da câmera",
-                    color = Color.White, style = MaterialTheme.typography.titleMedium
+                    color = CorTexto, style = MaterialTheme.typography.titleMedium
                 )
             }
         }
 
-        // ── Camada de UI sobre a câmera ──
-        // Fechar (topo esquerdo)
+        // fechar
         IconButton(
             onClick = onVoltar,
             modifier = Modifier
@@ -191,7 +178,7 @@ fun NovaCapturaScreen(
             Icon(Icons.Default.Close, "Fechar", tint = Color.White)
         }
 
-        // PILAR 4: EAN lido — chip verde no topo, acima do balão
+        // chip EAN lido
         eanLido?.let { ean ->
             Surface(
                 color = Destaque.copy(alpha = 0.92f),
@@ -204,81 +191,76 @@ fun NovaCapturaScreen(
                 Text(
                     "EAN $ean ✓",
                     Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
-                    color = Color(0xFF12092B),
+                    color = Color(0xFF04150F),
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Bold
                 )
             }
         }
 
-        // Cantoneiras de enquadramento (centro)
-        CantoneirasEnquadramento()
-
-        // Balão de dica + controles (base)
+        // ── base: botões da spec ──
         Column(
             Modifier
                 .align(Alignment.BottomCenter)
                 .navigationBarsPadding()
-                .padding(bottom = 28.dp),
+                .padding(bottom = 28.dp)
+                .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            BalaoDica()
-            Spacer(Modifier.height(18.dp))
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(34.dp)
+            if (eanLido == null) {
+                Text(
+                    "Posicione o item na moldura",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = CorTextoSec
+                )
+                Spacer(Modifier.height(10.dp))
+            }
+            // primário: sólido destaque
+            Button(
+                onClick = { gatilhoCaptura?.invoke() },
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Destaque,
+                    contentColor = Color(0xFF04150F)
+                ),
+                modifier = Modifier
+                    .fillMaxWidth(0.7f)
+                    .height(52.dp)
             ) {
-                IconButton(
-                    onClick = {
-                        galeria.launch(
-                            PickVisualMediaRequest(
-                                ActivityResultContracts.PickVisualMedia.ImageOnly
-                            )
+                Text("Tirar foto", style = MaterialTheme.typography.titleMedium)
+            }
+            Spacer(Modifier.height(12.dp))
+            // secundário: texto sublinhado (sem pill vazado)
+            Text(
+                "Escolher da galeria (até 10)",
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline
+                ),
+                color = Destaque,
+                modifier = Modifier.clickable {
+                    galeria.launch(
+                        PickVisualMediaRequest(
+                            ActivityResultContracts.PickVisualMedia.ImageOnly
                         )
-                    },
-                    modifier = Modifier
-                        .size(52.dp)
-                        .background(Color.Black.copy(alpha = 0.4f), CircleShape)
-                ) {
-                    Icon(Icons.Default.Image, "Galeria", tint = Color.White,
-                        modifier = Modifier.size(22.dp))
-                }
-                // PILAR 4: botão do scanner de código de barras (EAN)
-                IconButton(
-                    onClick = { escanerAtivo = !escanerAtivo },
-                    modifier = Modifier
-                        .size(52.dp)
-                        .background(
-                            if (escanerAtivo) Destaque else Color.Black.copy(alpha = 0.4f),
-                            CircleShape
-                        )
-                ) {
-                    Icon(
-                        Icons.Default.QrCodeScanner,
-                        contentDescription = "Ler Código de Barras (EAN)",
-                        tint = if (escanerAtivo) Color(0xFF12092B) else Color.White,
-                        modifier = Modifier.size(22.dp)
                     )
                 }
-                // Botão de captura grande — dispara o takePicture da CameraX
-                Box(
-                    Modifier
-                        .size(76.dp)
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.25f), CircleShape)
-                        .padding(6.dp)
-                        .background(Color.White, CircleShape)
-                        .clickable { gatilhoCaptura?.invoke() },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Box(
-                        Modifier
-                            .size(26.dp)
-                            .background(Color.Black.copy(alpha = 0.85f), CircleShape)
-                    )
-                }
-                // peso simétrico à esquerda (troca de lente numa próxima iteração)
-                Box(Modifier.size(52.dp))
+            )
+            Spacer(Modifier.height(16.dp))
+            // scanner EAN (ML Kit) — terceiro controle
+            OutlinedButton(
+                onClick = { escanerAtivo = !escanerAtivo },
+                shape = CircleShape,
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = if (escanerAtivo) Color(0xFF04150F) else CorTexto,
+                    containerColor = if (escanerAtivo) Destaque else Color.Transparent
+                ),
+                modifier = Modifier.size(52.dp)
+            ) {
+                Icon(
+                    Icons.Default.QrCodeScanner,
+                    contentDescription = "Ler Código de Barras (EAN)",
+                    modifier = Modifier.size(22.dp)
+                )
             }
         }
 
@@ -300,10 +282,9 @@ fun NovaCapturaScreen(
     }
 }
 
-/** Preview CameraX full-screen; registra o gatilho de captura no estado do pai.
- *  PILAR 4: quando escanerAtivo, analisa os frames com ML Kit (EAN-13). */
+/** Câmera real com moldura de borda PONTILHADA por cima (spec TELA 2). */
 @Composable
-private fun CameraImersiva(
+private fun CameraComMoldura(
     onGatilhoPronto: (() -> Unit) -> Unit,
     onFotoTirada: (File) -> Unit,
     onErro: (String) -> Unit,
@@ -316,7 +297,6 @@ private fun CameraImersiva(
     val imageCapture = remember { ImageCapture.Builder().build() }
     val analiseEan = remember { ImageAnalysis.Builder().build() }
 
-    // PILAR 4: (re)bind da câmera — roda no factory e a cada mudança do scanner
     fun reconstruirBind(view: PreviewView) {
         val providerFuture = ProcessCameraProvider.getInstance(view.context)
         providerFuture.addListener({
@@ -337,9 +317,7 @@ private fun CameraImersiva(
                             )
                             analisadorEan.process(entrada)
                                 .addOnSuccessListener { codigos ->
-                                    codigos.firstOrNull()?.rawValue?.let { ean ->
-                                        onEanLido(ean)
-                                    }
+                                    codigos.firstOrNull()?.rawValue?.let { ean -> onEanLido(ean) }
                                 }
                                 .addOnCompleteListener { proxy.close() }
                         } else proxy.close()
@@ -356,16 +334,34 @@ private fun CameraImersiva(
         }, ContextCompat.getMainExecutor(view.context))
     }
 
-    AndroidView(
-        modifier = Modifier.fillMaxSize(),
-        factory = { ctx ->
-            PreviewView(ctx).apply {
-                scaleType = PreviewView.ScaleType.FILL_CENTER
-            }
-        },
-        // PILAR 4: re-bind quando o scanner liga/desliga (update roda na recomposição)
-        update = { view -> reconstruirBind(view) }
-    )
+    Box(Modifier.fillMaxSize()) {
+        AndroidView(
+            modifier = Modifier.fillMaxSize(),
+            factory = { ctx ->
+                PreviewView(ctx).apply {
+                    scaleType = PreviewView.ScaleType.FILL_CENTER
+                }
+            },
+            update = { view -> reconstruirBind(view) }
+        )
+        // moldura pontilhada central (spec TELA 2: borda pontilhada sobre a câmera)
+        androidx.compose.foundation.Canvas(
+            Modifier
+                .align(Alignment.Center)
+                .size(280.dp)
+        ) {
+            drawRoundRect(
+                color = Color.White.copy(alpha = 0.85f),
+                cornerRadius = androidx.compose.ui.geometry.CornerRadius(24.dp.toPx()),
+                style = androidx.compose.ui.graphics.drawscope.Stroke(
+                    width = 2.dp.toPx(),
+                    pathEffect = androidx.compose.ui.graphics.PathEffect.dashPathEffect(
+                        floatArrayOf(14f, 12f)
+                    )
+                )
+            )
+        }
+    }
 
     DisposableEffect(Unit) {
         onGatilhoPronto {
@@ -385,83 +381,5 @@ private fun CameraImersiva(
             )
         }
         onDispose { }
-    }
-}
-
-/** 4 cantoneiras brancas finas no centro da tela (enquadramento sutil). */
-@Composable
-private fun CantoneirasEnquadramento() {
-    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        val lado = 280.dp
-        val espessura = 3.dp
-        val comprimento = 36.dp
-        Canvas(Modifier.size(lado)) {
-            val w = this.size.width
-            val h = this.size.height
-            val stroke = espessura.toPx()
-            val len = comprimento.toPx()
-            val cor = Color.White.copy(alpha = 0.9f)
-            listOf(
-                0f to 0f, w to 0f, 0f to h, w to h
-            ).forEach { (x, y) ->
-                val dx = if (x == 0f) 1f else -1f
-                val dy = if (y == 0f) 1f else -1f
-                drawLine(cor, Offset(x, y), Offset(x + dx * len, y), strokeWidth = stroke, cap = StrokeCap.Round)
-                drawLine(cor, Offset(x, y), Offset(x, y + dy * len), strokeWidth = stroke, cap = StrokeCap.Round)
-            }
-        }
-    }
-}
-
-/** Balão branco arredondado com seta pra baixo — flutua suavemente (v5.4). */
-@Composable
-private fun BalaoDica() {
-    // flutuação sutil: sobe/desce 4dp em loop
-    val transicao = rememberInfiniteTransition(label = "balao")
-    val flutua by transicao.animateFloat(
-        initialValue = -4f,
-        targetValue = 4f,
-        animationSpec = infiniteRepeatable(tween(1400), RepeatMode.Reverse),
-        label = "flutua"
-    )
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.graphicsLayer { translationY = flutua }
-    ) {
-        Box {
-            Column(
-                Modifier
-                    .background(Color.White, RoundedCornerShape(16.dp))
-                    .padding(horizontal = 18.dp, vertical = 12.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    "Fotografe o item",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF17171F)
-                )
-                Text(
-                    "A IA fará a avaliação e a precificação",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color(0xFF4B5570)
-                )
-            }
-            // seta do balão (triângulo branco logo abaixo do corpo, centralizada)
-            Canvas(
-                Modifier
-                    .align(Alignment.BottomCenter)
-                    .offset(y = 9.dp)
-                    .size(width = 18.dp, height = 10.dp)
-            ) {
-                val path = Path().apply {
-                    moveTo(0f, 0f)
-                    lineTo(size.width, 0f)
-                    lineTo(size.width / 2f, size.height)
-                    close()
-                }
-                drawPath(path, Color.White)
-            }
-        }
     }
 }

@@ -2,60 +2,83 @@ package br.com.anunciaai.ui.screens
 
 import android.content.Intent
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Chat
 import androidx.compose.material.icons.outlined.Mail
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import br.com.anunciaai.AnunciaAIApp
 import br.com.anunciaai.publica.mercadolivre.MercadoLivreApi
-import br.com.anunciaai.ui.BarraDockComBadge
+import br.com.anunciaai.publica.mercadolivre.PerguntaML
 import br.com.anunciaai.ui.EstadoVazio
 import br.com.anunciaai.ui.IconePlataforma
 import br.com.anunciaai.ui.Plataforma
-import br.com.anunciaai.ui.Rotas
+import br.com.anunciaai.ui.theme.CorTexto
+import br.com.anunciaai.ui.theme.CorTextoSec
 import br.com.anunciaai.ui.theme.Destaque
 import kotlinx.coroutines.launch
 
-/** v9 — Estado de não-lidas do inbox (badge do dock). MensagensScreen publica; dock lê. */
+/** v9 — Estado de não-lidas do inbox (badge da cápsula). MensagensScreen publica; cápsula lê. */
 object EstadoInbox {
     val naoLidas = kotlinx.coroutines.flow.MutableStateFlow(0)
 }
 
 /**
- * Mensagens (v5.3 — ITEM 2 da spec visual):
- * - Barra de PILLS roláveis no topo: Todas / Não lidas / Ofertas
- *   (ativo = fundo destaque + texto branco; inativo = cinza-escuro + texto claro)
- * - Inbox unificado: toda linha com badge da marca, remetente, prévia, "Abrir conversa"
- * - Empty state premium centralizado (ITEM 3)
+ * TELA 5 — MENSAGENS (v12.0, reescrita do zero).
+ * Mesma estrutura visual da Conexões (badge + nome + texto, separador 1px,
+ * sem sombra): prévia da última mensagem + HORÁRIO quando vier de API real
+ * (Mercado Livre); "Abrir conversa" nas plataformas sem API.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MensagensScreen(onNavBottom: (String) -> Unit = {}) {
+fun MensagensScreen() {
     val contexto = LocalContext.current
     val app = contexto.applicationContext as AnunciaAIApp
     val escopo = rememberCoroutineScope()
     val contas by app.repositorio.contas().collectAsState(initial = emptyList())
 
-    var perguntas by remember { mutableStateOf<List<br.com.anunciaai.publica.mercadolivre.PerguntaML>>(emptyList()) }
+    var perguntas by remember { mutableStateOf<List<PerguntaML>>(emptyList()) }
     var carregando by remember { mutableStateOf(false) }
     var erro by remember { mutableStateOf<String?>(null) }
-    var responder by remember { mutableStateOf<br.com.anunciaai.publica.mercadolivre.PerguntaML?>(null) }
-    var textoResposta by remember { mutableStateOf(androidx.compose.ui.text.input.TextFieldValue("")) }
-    var filtro by remember { mutableStateOf("Todas") }
-
-    val filtros = listOf("Todas", "Não lidas", "Ofertas")
+    var responder by remember { mutableStateOf<PerguntaML?>(null) }
+    var textoResposta by remember { mutableStateOf(TextFieldValue("")) }
 
     LaunchedEffect(contas.size) {
         val conta = contas.firstOrNull { it.plataforma == "MERCADO_LIVRE" }
@@ -63,7 +86,8 @@ fun MensagensScreen(onNavBottom: (String) -> Unit = {}) {
             carregando = true
             erro = null
             try {
-                perguntas = MercadoLivreApi().puxarPerguntas(conta.accessTokenCriptografado, "").also { EstadoInbox.naoLidas.value = it.size }
+                perguntas = MercadoLivreApi().puxarPerguntas(conta.accessTokenCriptografado, "")
+                    .also { EstadoInbox.naoLidas.value = it.size }
             } catch (e: Exception) {
                 erro = "ML: ${e.message}"
             }
@@ -78,12 +102,13 @@ fun MensagensScreen(onNavBottom: (String) -> Unit = {}) {
         )
     }
 
-    // linhas: perguntas do ML + plataformas sem API
+    // linhas do inbox: perguntas do ML (API real) + plataformas sem API
     data class LinhaInbox(
         val plataforma: String,
         val conectada: Boolean,
         val titulo: String,
         val previa: String?,
+        val horario: String?,
         val viaApi: Boolean,
         val onClick: () -> Unit
     )
@@ -101,8 +126,9 @@ fun MensagensScreen(onNavBottom: (String) -> Unit = {}) {
                     conectada = true,
                     titulo = p.deQuem,
                     previa = p.texto,
+                    horario = p.data.take(10),
                     viaApi = true,
-                    onClick = { responder = p; textoResposta = androidx.compose.ui.text.input.TextFieldValue("") }
+                    onClick = { responder = p; textoResposta = TextFieldValue("") }
                 )
             )
         }
@@ -114,48 +140,23 @@ fun MensagensScreen(onNavBottom: (String) -> Unit = {}) {
                     conectada = conectada,
                     titulo = Plataforma.doNome(plat)?.rotulo ?: plat,
                     previa = null,
+                    horario = null,
                     viaApi = false,
                     onClick = { abrirInbox(url) }
                 )
             )
         }
     }
-    // filtros: "Não lidas" = perguntas do ML; "Ofertas" = linhas sem API; "Todas" = tudo
-    val linhasFiltradas = when (filtro) {
-        "Não lidas" -> linhas.filter { it.viaApi }
-        "Ofertas" -> linhas.filter { !it.viaApi }
-        else -> linhas
-    }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Mensagens") }) },
-        bottomBar = { BarraDockComBadge(Rotas.MENSAGENS, onNavBottom) }
-        // v11.1: FAB duplicado EXTINTO — o "+" vive UMA vez, integrado na cápsula (BarraDockNova).
+        containerColor = br.com.anunciaai.ui.theme.CorFundo,
+        topBar = {
+            TopAppBar(
+                title = { Text("Mensagens", style = MaterialTheme.typography.headlineSmall, color = CorTexto) }
+            )
+        }
     ) { pad ->
         Column(Modifier.padding(pad).fillMaxSize()) {
-            // ── Pills de filtro (ITEM 2) ──
-            LazyRow(
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(filtros) { f ->
-                    val ativo = f == filtro
-                    androidx.compose.material3.FilterChip(
-                        selected = ativo,
-                        onClick = { filtro = f },
-                        shape = CircleShape,
-                        colors = androidx.compose.material3.FilterChipDefaults.filterChipColors(
-                            containerColor = androidx.compose.ui.graphics.Color(0xFF1B2440), // cinza-escuro
-                            labelColor = androidx.compose.ui.graphics.Color(0xFFEDEFF7),
-                            selectedContainerColor = Destaque,          // azul/verde-destaque
-                            selectedLabelColor = androidx.compose.ui.graphics.Color.White
-                        ),
-                        border = null,
-                        label = { Text(f, style = MaterialTheme.typography.labelLarge) }
-                    )
-                }
-            }
-
             if (carregando) {
                 Row(
                     Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
@@ -163,8 +164,11 @@ fun MensagensScreen(onNavBottom: (String) -> Unit = {}) {
                 ) {
                     CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp, color = Destaque)
                     Spacer(Modifier.width(10.dp))
-                    Text("Buscando perguntas...", style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(
+                        "Buscando perguntas...",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = CorTextoSec
+                    )
                 }
             }
             erro?.let {
@@ -176,26 +180,24 @@ fun MensagensScreen(onNavBottom: (String) -> Unit = {}) {
                 )
             }
 
-            if (linhasFiltradas.isEmpty() && !carregando) {
-                // ── Empty state premium (ITEM 3) ──
+            if (linhas.isEmpty() && !carregando) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     EstadoVazio(
                         icone = Icons.Outlined.Mail,
                         titulo = "Nada por aqui ainda",
-                        subtitulo = "Quando os compradores mandarem mensagens ou perguntas, elas aparecem aqui.",
-                        textoBotao = "Conectar plataformas",
-                        onBotao = { onNavBottom(Rotas.PERFIL) },
-                        modifier = Modifier
+                        subtitulo = "Quando os compradores mandarem mensagens ou perguntas, elas aparecem aqui."
                     )
                 }
             } else {
                 LazyColumn(Modifier.fillMaxSize()) {
-                    items(linhasFiltradas, key = { "${it.plataforma}_${it.titulo}" }) { linha ->
+                    items(linhas, key = { "${it.plataforma}_${it.titulo}" }) { linha ->
                         LinhaMensagem(
                             plataforma = linha.plataforma,
                             conectada = linha.conectada,
                             titulo = linha.titulo,
                             previa = linha.previa,
+                            horario = linha.horario,
+                            viaApi = linha.viaApi,
                             onClick = linha.onClick
                         )
                     }
@@ -237,16 +239,15 @@ fun MensagensScreen(onNavBottom: (String) -> Unit = {}) {
     }
 }
 
-// estado de navegação pra Conexões a partir do empty state
-private var abrirConexoes by androidx.compose.runtime.mutableStateOf(false)
-
-/** Linha de mensagem: badge da marca + remetente + prévia/Abrir conversa. */
+/** Linha da mensagem: badge da marca + remetente + prévia + horário/"Abrir conversa". */
 @Composable
 private fun LinhaMensagem(
     plataforma: String,
     conectada: Boolean,
     titulo: String,
     previa: String?,
+    horario: String?,
+    viaApi: Boolean,
     onClick: () -> Unit
 ) {
     Column(
@@ -257,16 +258,28 @@ private fun LinhaMensagem(
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconePlataforma(plataforma, conectada = conectada, tamanho = 36.dp)
-            Spacer(Modifier.width(12.dp))
+            Spacer(Modifier.width(14.dp))
             Column(Modifier.weight(1f)) {
-                Text(titulo, style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(
+                    titulo, style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = CorTexto,
+                    maxLines = 1, overflow = TextOverflow.Ellipsis
+                )
                 Text(
                     previa ?: "Abrir conversa",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = if (previa == null) Destaque else MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = if (previa == null) Destaque else CorTextoSec,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
+                )
+            }
+            // horário quando vem de API real
+            if (viaApi && horario != null) {
+                Text(
+                    horario,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = CorTextoSec
                 )
             }
         }
