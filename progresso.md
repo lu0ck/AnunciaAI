@@ -70,6 +70,16 @@ Kotlin + Jetpack Compose · Room · Retrofit/OkHttp · WebView (`evaluateJavascr
 - (nada — todos os builds passaram)
 
 ## Feito (adicional, depois do build 1)
+- [x] 03/10 — **v12.0 (BUILD 36) — REESCRITA TOTAL (spec consolidação, 6 telas do zero):**
+  - **Tema v12 de volta ao ESCURO**: #12151A fundo, #1B1F26 superfície, destaque ÚNICO #00C896, texto #F2F2F0 SEMPRE em preço/títulos, sec #8B909A, erro #FF5470, Manrope 400/600/800, título tela 28/800. Paleta v11 clara EXTINTA do binário (F4F4F7/A3E635/65A30D = 0 ocorrências). SystemBarStyle.dark de volta.
+  - **NavCapsula (arquitetura nova)**: cápsula glass (Surface RoundedCornerShape(32.dp), padding 16/12dp, blur 16.dp API 31+ com fallback sólido Black60% <31) com FAB "+" ÚNICO — mora no NavGraph RAIZ (um Box raiz, cápsula só nas 4 abas), NUNCA mais declarada por tela. BarraDockNova.kt + FabCentral + brilhoNeon/BrilhoNeon.kt DELETADOS. Telas perderam bottomBar/onNavBottom de vez.
+  - **Tela 1 Início (do zero)**: hero card gradiente #00C896→#0A5C6E cantos 20dp com "+ Novo item" DENTRO; vendas por plataforma SÓ CONECTADAS com selo % verde/vermelho; "Itens recentes" em LazyVerticalGrid(Fixed(2)) DE NÍVEL SUPERIOR (GridItemSpan p/ hero/seções) — zero aninhamento; preço CorTexto peso 800; badges sobrepostos. Zero decoração de fundo.
+  - **Tela 2 Vender (do zero)**: câmera real + moldura de BORDA PONTILHADA (dashPathEffect) central; "Tirar foto" sólido destaque + "Escolher da galeria (até 10)" texto SUBLINHADO (sem pill); scanner EAN ML Kit no botão QrCodeScanner; tela escura integral. Análise reescrita com PILHA DE CARDS EMPILHADOS (offset fixo (i*26).dp, card em foco com zIndex+scale+elevação, check verde spring, revelação 650ms/card) — lógica v11.1 mantida (persiste antes de navegar, gerarComContrato retry).
+  - **Tela 3 Revisar (do zero)**: campos #1B1F26 sem borda (tom só no foco), estado inicial DIRETO do item persistido (chip condição = valor EXATO da IA via remember(item?.id)), 4 chips fixos em FlowRow, categoria+preço Row weight(1f) maxLines=1+Ellipsis, chips "Onde publicar" com COR DA MARCA (preenchido/contorno), carrossel miniaturas alinhadas + DOTS, botão Gerar persiste condição no Room também.
+  - **Tela 4 Conexões (do zero)**: linhas com separador 1px (sem card/sombra), badge quadrado cor de marca, status por TEXTO (Conectado destaque/Não conectado cinza), card IA no topo mantido.
+  - **Tela 5 Mensagens (do zero)**: mesma estrutura de linha (badge+nome+texto, separador 1px), prévia + HORÁRIO nas perguntas ML (API real), "Abrir conversa" nas WebView; diálogo de resposta ML mantido; pills de filtro REMOVIDAS (spec não pede).
+  - **Config/Vitrine/Status/Detalhe/EstadoVazio**: reescritos pro tema v12 (sem dock, sem FAB, cores do tema). EstadoVazio neutro #23272E.
+  - **Verificação binária 18/18**: 7 cores v12 presentes, 3 da v11 AUSENTES, 8 strings da spec, BarraDockNova sumiu do mapping, FabCentral 0 usos, NavCapsula/ItemCapsula/FabDaCapsula no mapping (536), versionCode 21 / v12.0, assinatura 5bb25361, testes unitários 4/4 PASS. APK 24MB.
 - [x] 03/10 — **v11.1 (BUILD 35) — PACOTE DE CORREÇÕES DEFINITIVAS (6 fixes do prompt do Lucas):**
   - **FIX 1 (FAB duplicado — bug de arquitetura)**: confirmado no código — a cápsula já tinha o "+" lime integrado E cada Scaffold redeclarava `floatingActionButton = { FabCentral() }` = dois "+" sobrepostos em 4 telas. Corrigido: `FabCentral` EXTINTO (função removida, 0 usos), `floatingActionButton`/`FabPosition` removidos dos 4 Scaffolds (Lista/Vitrine/Mensagens/Config). O "+" agora existe UMA vez, integrado na cápsula (BarraDockNova). **Glass**: fundo translúcido 69% + `Modifier.blur(16.dp)` na camada de fundo (API 31+; fallback 94% opaco sem blur no <31) + sombra 6dp no círculo lime. Bônus: na v11 a sombra da cápsula vinha DEPOIS do clip (invisível) — corrigido.
   - **FIX 2 (condição da IA desconectada da UI)**: causa raiz era MAIS FUNDA — a entidade `Item` NÃO TINHA campo `condicao`; a AnaliseScreen salvava título/preço/categoria e DESCARTAVA a condição; a Revisão reconstruía a SugestaoIA sem ela → chip caía sempre em "bom estado". Corrigido em 3 camadas: (a) DB **v5**: `Item` ganha `condicao` + `ean`; (b) AnaliseScreen persiste `s.condicaoNormalizada` no item (e leitura via `itemNow()` — antes o save era PULADO se o Flow do Room ainda não tivesse emitido); (c) RevisaoScreen inicializa os estados DIRETAMENTE do item persistido via `remember(item?.id)` — `condicao = item.condicao normalizada`, nunca constante. LaunchedEffect de auto-preenchimento removido (era a fonte da dessincronia). `publicar()` também persiste a condição editada. Detalhe mostra "Condição: X".
@@ -208,18 +218,18 @@ GRADLE_USER_HOME=$PWD/.gradle-home ANDROID_HOME=$PWD/android-sdk JAVA_HOME=$PWD/
 GRADLE_USER_HOME=$PWD/.gradle-home ANDROID_HOME=$PWD/android-sdk JAVA_HOME=$PWD/jdk-17.0.20.1+1 ./gradle-8.10.2/bin/gradle assembleRelease --console=plain
 ```
 
-## ⚠️ ESTADO ATUAL (03/10 v11.1 — ler isto primeiro no chat novo)
-- **APK atual: `AnunciaAI-11.1.apk` (versionCode 20, v11.1, 24MB)** na raiz, servidor :8899 NO AR. **NÃO testado no celular** — 6 fixes do pacote definitivo aguardam prova real no aparelho (FAB único na cápsula com glass, chip de condição batendo com a IA, grid 2 colunas na Home, scanner EAN).
-- Git: tudo commitado e pushado até `c1a2688`. Repo: github.com/lu0ck/AnunciaAI (PÚBLICA).
-- IA: NVIDIA NIM (llama-3.2-11b-vision) FUNCIONAL — chave em local.properties. Contrato v11.1: condicao estrita em 4 valores + REGRAS ANTI-CONTRADIÇÃO + retry automático (gerarComContrato) quando fora do contrato. 4 testes unitários PASS.
-- Design atual: tema claro bike-shop (#F4F4F7/#FFFFFF/#17171F, lime #A3E635), cápsula flutuante GLASS (blur API 31+) com "+" ÚNICO integrado, cards brancos 24dp, chips pílula, grid 2 colunas sem aninhamento (chunked), câmera imersiva CameraX + scanner EAN ML Kit.
+## ⚠️ ESTADO ATUAL (03/10 v12.0 — ler isto primeiro no chat novo)
+- **APK atual: `AnunciaAI-12.0.apk` (versionCode 21, v12.0, 24MB)** na raiz. **NÃO testado no celular** — reescrita total das 6 telas + arquitetura nova de navegação (cápsula na raiz) aguardam prova real no aparelho.
+- Git: tudo commitado e pushado até `049babf`. Repo: github.com/lu0ck/AnunciaAI (PÚBLICA).
+- IA: NVIDIA NIM (llama-3.2-11b-vision) FUNCIONAL — chave em local.properties. Contrato: condicao estrita em 4 valores + REGRAS ANTI-CONTRADIÇÃO + retry automático (gerarComContrato). 4 testes unitários PASS.
+- Design atual (v12 REESCRIPTO): tema ESCURO #12151A/#1B1F26, destaque única #00C896, texto #F2F2F0, Manrope 400/600/800; NavCapsula glass (blur API 31+) com FAB único na RAIZ; Início com hero gradiente + grid 2 col top-level; Vender com moldura pontilhada + pilha de cards na análise; Revisão com chips de marca e condição vinda direto da IA; Conexões/Mensagens com separador 1px.
 - **Convite ao chat novo**: este chat está crescendo — manter respostas curtas, poupar contexto.
 
 ## Continuação (chat novo → "continuar do progresso.md")
 Novo chat com nome "AnunciaAI" → dizer "continuar do progresso.md". Estado completo acima; comandos de build abaixo.
 
 ## Planejado (próximas tarefas, em ordem)
-- [ ] **TESTAR v11.1 no celular** (prioridade máxima — tudo abaixo depende de bugs reais): "+" único na cápsula (glass no Android 12+)? Chip de condição bate com a resposta da IA (gerar item "novo")? Grid 2 colunas na Home sem card espremido? Preço legível nos cards? Scanner EAN lê código? Câmera imersiva funciona?
+- [ ] **TESTAR v12.0 no celular** (prioridade máxima — reescrita total, tudo abaixo depende de bugs reais): cápsula glass flutuando com "+" único nas 4 abas? Chip de condição bate com a resposta da IA? Grid 2 colunas na Home? Moldura pontilhada + câmera? Pilha de cards na análise? Preços legíveis #F2F2F0?
 - [ ] Corrigir o que vier do teste (histórico de crashes da v6/v6.1 mostra que câmera/dock precisam de prova real)
 - [ ] Credenciais ML: app no DevCenter (developers.mercadolivre.com.br) → ANUNCIAAI_ML_CLIENT_ID/SECRET no local.properties + redirect br.com.anunciaai://oauth/ml → rebuild → testar OAuth + publicação via API + Mensagens ML
 - [ ] Testar OLX WebView de novo (v8.0 tem onReceivedHttpError + tela amigável + UA Chrome — ver se a OLX agora deixa logar/publicar)
