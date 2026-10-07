@@ -1,5 +1,6 @@
 package br.com.anunciaai.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -52,6 +53,7 @@ fun ConfigScreen(
             Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
+                .background(br.com.anunciaai.ui.theme.CorFundo)
                 .padding(horizontal = 16.dp)
         ) {
             Spacer(Modifier.height(8.dp))

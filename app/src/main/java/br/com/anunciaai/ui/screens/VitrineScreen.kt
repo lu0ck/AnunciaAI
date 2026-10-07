@@ -1,5 +1,6 @@
 package br.com.anunciaai.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -52,7 +53,11 @@ fun VitrineScreen(
     val itens by app.repositorio.itens().collectAsState(initial = emptyList())
     val pubs by app.repositorio.publicacoes().collectAsState(initial = emptyList())
 
-    Column(Modifier.fillMaxSize()) {
+    Column(
+        Modifier
+            .fillMaxSize()
+            .background(br.com.anunciaai.ui.theme.CorFundo)
+    ) {
         TopAppBar(
             title = { Text("Vitrine", style = MaterialTheme.typography.headlineSmall, color = CorTexto) }
         )

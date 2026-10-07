@@ -84,7 +84,11 @@ fun ListaItensScreen(
     val agora = System.currentTimeMillis()
     val semana = 7L * 24 * 3600 * 1000
 
-    Column(Modifier.fillMaxSize()) {
+    Column(
+        Modifier
+            .fillMaxSize()
+            .background(br.com.anunciaai.ui.theme.CorFundo)
+    ) {
         TopAppBar(
             title = {
                 Text(
