@@ -70,10 +70,10 @@ Kotlin + Jetpack Compose · Room · Retrofit/OkHttp · WebView (`evaluateJavascr
 - (nada — todos os builds passaram)
 
 ## Feito (adicional, depois do build 1)
-- [x] 08/10 — **FIX PONTUAL: botão voltar em Conexões (código aplicado, teste incompleto):**
-  - `ConexoesScreen` ganhou `onVoltar` + seta ArrowBack na top bar (mesmo padrão de Revisão/Status/Detalhe); NavGraph passa `nav.popBackStack()`. Commit pendente de push (ver "Não terminado").
-  - IA e Sobre NÃO são telas — cards/linhas estáticas na própria Config (não há como ficar preso nelas; confirmar visual no emulador no chat novo).
-  - **Emulador**: build OK, APK instalado, mas a verificação do tap em Conexões ficou INCOMPLETA (uiautomator dump saiu vazio; o app estava na tela Início — o tap na linha Conexões não registrou). RETOMAR: abrir Config → Conexões → conferir seta ← → tocar → confirmar volta. Emulador estava RODANDO com o build do fix instalado.
+- [x] 08/10 — **FIX PONTUAL: botão voltar em Conexões — VERIFICADO NO EMULADOR:**
+  - `ConexoesScreen` ganhou `onVoltar` + seta ArrowBack na top bar (mesmo padrão de Revisão/Status/Detalhe); NavGraph passa `nav.popBackStack()`. Commit `3e2aaeb` — commitado E pushado (confirmado: `origin/main...HEAD` = 0/0).
+  - **Verificação E2E no emulador (08/10, completa)**: dump uiautomator OK (1ª chamada pós-boot segfaulta — rerodar) → Conexões mostra botão `Voltar` content-desc em [11,158][143,290] → `input tap 77 224` → dump confirma tela "Configurações" de volta. ✅
+  - IA e Sobre confirmados no dump como linhas ESTÁTICAS (não clicáveis) na própria Config — não existe como ficar preso nelas.
   - **DevCenter (instrução do Lucas, passo a passo recebido)**: redirect URI EXATA confirmada no código = **`br.com.anunciaai://oauth/ml`** (Manifest: scheme `br.com.anunciaai` + host `oauth`; MercadoLivreApi.REDIRECT_URI). NÃO usar `anunciaai://oauth/mercadolivre`. Escopos: read, write, offline_access. Copiar APP ID/Secret → local.properties como ANUNCIAAI_ML_CLIENT_ID/ANUNCIAAI_ML_CLIENT_SECRET → rebuild → testar OAuth no emulador.
 - [x] 05/10 — **FIX PONTUAL: fundo claro em Início/Vitrine/Config (emulador pegou):**
   - Causa raiz DUPLA: (a) as 3 telas eram `Column` puro sem fundo (Mensagens tinha `Scaffold(containerColor=CorFundo)`, elas não); (b) o tema XML era `Theme.Material.Light.NoActionBar` — windowBackground claro aparecendo por baixo do Compose. Corrigido: Column raiz ganhou `.background(CorFundo)` nas 3 + `themes.xml` trocou pra `Theme.Material.NoActionBar` com `windowBackground=#12151A` (colors.xml: fundo_escuro).
@@ -246,7 +246,6 @@ Novo chat com nome "AnunciaAI" → dizer "continuar do progresso.md". Estado com
 - [ ] (opcional) eBay Production keys; Shopee Open Platform (aprovação de parceiro — fora do nosso controle)
 
 ## Não terminado / Pendente usuário
-- **Commit do fix do voltar em Conexões: código aplicado mas NÃO commitado** — no chat novo: `git status` → commitar (ConexoesScreen.kt + AnunciaAINavGraph.kt) → push. Depois testar o voltar no emulador.
 - App criado no https://developers.mercadolivre.com.br/devcenter → `ANUNCIAAI_ML_CLIENT_ID` + `ANUNCIAAI_ML_CLIENT_SECRET` (redirect: **br.com.anunciaai://oauth/ml** — confirmado no código; se recusar deep link, avisar o Hermes p/ ajustar o app)
   - (opcional) eBay Production keys → `ANUNCIAAI_EBAY_CLIENT_ID` + `ANUNCIAAI_EBAY_CLIENT_SECRET`
 - Gemini: chave "AQ." do Lucas NÃO serve no AI Studio (precisa AIza... — criar nova em aistudio.google.com/apikey se quiser 2º provedor)
