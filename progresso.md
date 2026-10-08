@@ -70,6 +70,14 @@ Kotlin + Jetpack Compose · Room · Retrofit/OkHttp · WebView (`evaluateJavascr
 - (nada — todos os builds passaram)
 
 ## Feito (adicional, depois do build 1)
+- [x] 08/10 — **SPEC v6 FASE 1 — BUG: condição vazia não derruba mais a resposta (commit `16bf13e`, pushado):**
+  - `gerarComContrato`: retry SÓ quando falta essencial (título/descrição/categoria/preço ou "PRODUTO NÃO IDENTIFICADO"); condição vazia/estranha vira `bom estado` + flag `condicaoEstimada` — resposta segue inteira.
+  - `normalizarCondicao`: sem acentos ("Bom Estado" ok) + sinônimos da spec: seminovo/quase novo/praticamente novo → como novo; lacrado/nunca usado → novo; usado/desgaste → bom estado/marcas de uso.
+  - Prompts NVIDIA+Qwen: `condicao` OBRIGATÓRIA nunca vazia; imagem de catálogo → `novo`; incerto → `bom estado`.
+  - `AnaliseScreen`: falha REAL agora mostra "Tentar de novo" + "Preencher manualmente" (sem "Ver anúncio" p/ revisão vazia); aviso discreto "Condição estimada — confira na revisão"; **rememberSaveable** nos estados (bug antigo: voltar da revisão re-criava a tela e RE-CHAMAVA a IA — custo dobrado).
+  - `Item.condicaoEstimada` (DB **v6**, destrutiva); Revisão mostra "Condição estimada — confira se está correta" quando a flag vem true.
+  - **Testes 7/7 PASS** (vazia→estimado, sinônimos, retry essencial, falha persistente). **E2E real no emulador**: foto de placa de vídeo (Unsplash) → IA respondeu em ~10s → 5 cards preencheram → revisão com dados reais (desc completa, R$ 1500, categoria 4 níveis, chip "bom estado"). Lucas testou no aparelho e liberou o emulador.
+  - **Spec v6 pendente: FASES 2-6** (preço centavos; redesign Revisão/Análise/Vitrine; movimento). ESPERANDO "ok" do Lucas por fase.
 - [x] 08/10 — **FIX PONTUAL: botão voltar em Conexões — VERIFICADO NO EMULADOR:**
   - `ConexoesScreen` ganhou `onVoltar` + seta ArrowBack na top bar (mesmo padrão de Revisão/Status/Detalhe); NavGraph passa `nav.popBackStack()`. Commit `3e2aaeb` — commitado E pushado (confirmado: `origin/main...HEAD` = 0/0).
   - **Verificação E2E no emulador (08/10, completa)**: dump uiautomator OK (1ª chamada pós-boot segfaulta — rerodar) → Conexões mostra botão `Voltar` content-desc em [11,158][143,290] → `input tap 77 224` → dump confirma tela "Configurações" de volta. ✅
