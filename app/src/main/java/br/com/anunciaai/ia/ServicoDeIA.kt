@@ -25,10 +25,11 @@ interface ServicoDeIA {
 }
 
 /**
- * v11.1 (fix #3): wrapper com RETRY quando a IA devolve a "condicao" fora das
- * 4 strings exatas ("novo"/"como novo"/"bom estado"/"marcas de uso"). Qualquer
- * resposta fora do contrato é tratada como erro de parsing e a chamada é
- * re-tentada (1 vez a mais) com instrução de correção antes de desistir.
+ * v11.1 (fix #3) → FASE 1 (spec v6): wrapper com RETRY só para defeitos REAIS da
+ * resposta: JSON quebrado ou faltando título/descrição/categoria/preço. A
+ * condição fora das 4 strings NÃO derruba mais a resposta — é normalizada
+ * (sinônimos + acentos) e, se vier vazia/irreconhecível, vira "bom estado"
+ * com `condicaoEstimada = true` (a UI avisa "condição estimada, confira").
  */
 suspend fun ServicoDeIA.gerarComContrato(
     fotos: List<ByteArray>,
@@ -39,10 +40,19 @@ suspend fun ServicoDeIA.gerarComContrato(
     repeat(tentativas) { indice ->
         val r = if (ean.isNullOrBlank()) gerarAnuncioMulti(fotos) else gerarAnuncioComEan(fotos, ean)
         r.onSuccess { s ->
-            if (s.condicao in SugestaoIA.CONDICOES) return Result.success(s)
-            // fora do contrato → erro de parsing, re-tenta
+            // FASE 1: só é resposta inutilizável se faltar o ESSENCIAL.
+            // Condição vazia/estranha = parcial aceitável, não erro — a
+            // resposta volta CRUA (o getter condicaoNormalizada resolve, e
+            // condicaoEstimada preserva o sinal pro aviso na UI).
+            val tituloUtilizavel = s.titulo.isNotBlank() &&
+                !"NÃO IDENTIFICADO".let { s.titulo.uppercase().contains(it) }
+            val essencialOk = tituloUtilizavel &&
+                s.descricao.isNotBlank() &&
+                s.categoria_sugerida.isNotBlank() &&
+                s.melhorPreco > 0
+            if (essencialOk) return Result.success(s)
             ultimoErro = Exception(
-                "condicao \"${s.condicao}\" fora do contrato (esperado: ${SugestaoIA.CONDICOES})"
+                "campo essencial faltando (titulo=${tituloUtilizavel}, descricao=${s.descricao.isNotBlank()}, categoria=${s.categoria_sugerida.isNotBlank()}, preco=${s.melhorPreco})"
             )
         }.onFailure { ultimoErro = it as? Exception ?: Exception(it.message) }
     }

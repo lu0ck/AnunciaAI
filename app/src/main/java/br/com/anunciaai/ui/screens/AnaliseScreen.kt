@@ -35,14 +35,18 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -64,6 +68,7 @@ import br.com.anunciaai.ui.theme.CorTexto
 import br.com.anunciaai.ui.theme.CorTextoSec
 import br.com.anunciaai.ui.theme.Destaque
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 /**
  * TELA 2 (continuação) — ANÁLISE DA IA (v12.0, reescrita do zero).
@@ -96,29 +101,35 @@ fun AnaliseScreen(
         Campo("Preço", Icons.Default.Payments),
         Campo("Condição", Icons.Default.LocalOffer)
     )
-    var preenchidos by remember { mutableStateOf(mapOf<String, String>()) }
-    var terminado by remember { mutableStateOf(false) }
+    var preenchidos by rememberSaveable { mutableStateOf(mapOf<String, String>()) }
+    var terminado by rememberSaveable { mutableStateOf(false) }
     var erro by remember { mutableStateOf<String?>(null) }
-    var iniciado by remember { mutableStateOf(false) }
+    var iniciado by rememberSaveable { mutableStateOf(false) }
+    // FASE 1: sinaliza falha REAL (sem resultado utilizável) — "Ver anúncio" some
+    var falhou by rememberSaveable { mutableStateOf(false) }
+    // FASE 1: condição veio vazia/estranha e foi estimada — aviso discreto
+    var condicaoEstimada by rememberSaveable { mutableStateOf(false) }
 
     // índice do card "em foco" = último preenchido (fica na frente da pilha)
     val foco = if (preenchidos.isEmpty()) 0 else campos.indexOfLast { preenchidos[it.nome] != null } + 1
 
-    LaunchedEffect(itemId, fotos.size) {
-        if (iniciado || fotos.isEmpty()) return@LaunchedEffect
-        iniciado = true
+    // FASE 1: análise isolada em função — roda no 1º load E no "Tentar de novo"
+    val escopo = rememberCoroutineScope()
+    suspend fun rodarAnalise() {
         val fotosBytes = fotos.sortedBy { it.ordem }.mapNotNull { FotoUtil.lerBytes(contexto, it.uri) }
         if (fotosBytes.isEmpty()) {
             erro = "Não consegui ler as fotos."
-            return@LaunchedEffect
+            falhou = true
+            return
         }
         val servico = FabricaIA.criar()
         if (servico == null) {
-            erro = "Sem chave de IA neste build — toque em Ver anúncio e preencha manualmente."
-            terminado = true
-            return@LaunchedEffect
+            erro = "Sem chave de IA neste build — preencha manualmente."
+            falhou = true
+            return
         }
-        // v11.1: contrato com re-tentativa quando a condição vem fora das 4 exatas
+        // FASE 1 (v6): retry só p/ JSON quebrado/campos essenciais faltando;
+        // condição vazia vira "bom estado" + aviso, sem descartar a resposta
         val resultado = servico.gerarComContrato(
             fotos = fotosBytes,
             ean = ean.takeIf { !it.isNullOrBlank() }
@@ -136,10 +147,12 @@ fun AnaliseScreen(
                             precoSugerido = s.melhorPreco,
                             precoComparativoMercado = s.precoComparativoMercado,
                             condicao = s.condicaoNormalizada,
+                            condicaoEstimada = s.condicaoEstimada,
                             ean = ean
                         )
                     )
                 }
+                condicaoEstimada = s.condicaoEstimada
                 val valores = listOf(
                     "Categoria" to s.categoria_sugerida,
                     "Título" to s.titulo,
@@ -147,16 +160,23 @@ fun AnaliseScreen(
                     "Preço" to (if (s.melhorPreco > 0) "R$ ${"%.2f".format(s.melhorPreco)}" else "—"),
                     "Condição" to s.condicaoNormalizada
                 )
-                for ((_, par) in valores.withIndex()) {
-                    preenchidos = preenchidos + (par.first to par.second)
+                for (par in valores) {
+                    preenchidos = preenchidos + par
                     delay(650)
                 }
                 terminado = true
             }
             .onFailure { e ->
                 erro = "IA: ${e.message}"
-                terminado = true
+                // FASE 1: falha REAL = sem "Ver anúncio" p/ revisão vazia
+                falhou = true
             }
+    }
+
+    LaunchedEffect(itemId, fotos.size) {
+        if (iniciado || fotos.isEmpty()) return@LaunchedEffect
+        iniciado = true
+        rodarAnalise()
     }
 
     Box(Modifier.fillMaxSize().background(CorFundo)) {
@@ -176,11 +196,19 @@ fun AnaliseScreen(
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                if (!terminado) "A IA está escrevendo seu anúncio"
-                else "Pronto — toque em Ver anúncio",
+                if (!terminado) "A IA está escrevendo seu anúncio" else "Pronto",
                 style = MaterialTheme.typography.bodyMedium,
                 color = CorTextoSec
             )
+            // FASE 1: aviso discreto quando a condição foi estimada
+            if (terminado && condicaoEstimada) {
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    "Condição estimada — confira na revisão",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = CorTextoSec
+                )
+            }
             Spacer(Modifier.height(28.dp))
 
             // ── PILHA DE CARDS EMPILHADOS (leque) ──
@@ -229,19 +257,49 @@ fun AnaliseScreen(
             }
 
             Spacer(Modifier.height(28.dp))
-            if (terminado) {
-                Button(
-                    onClick = { onVerAnuncio(itemId) },
-                    modifier = Modifier.fillMaxWidth().height(54.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Destaque, contentColor = Color(0xFF04150F)
-                    )
-                ) {
-                    Text("Ver anúncio", style = MaterialTheme.typography.titleMedium)
+            when {
+                // FASE 1: falha real → botões de recuperação, sem "Ver anúncio"
+                falhou -> {
+                    Button(
+                        onClick = {
+                            // reseta o estado e roda a análise de novo
+                            iniciado = false; falhou = false; erro = null
+                            preenchidos = emptyMap(); terminado = false
+                            escopo.launch { rodarAnalise() }
+                        },
+                        modifier = Modifier.fillMaxWidth().height(54.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Destaque, contentColor = Color(0xFF04150F)
+                        )
+                    ) {
+                        Text("Tentar de novo", style = MaterialTheme.typography.titleMedium)
+                    }
+                    Spacer(Modifier.height(10.dp))
+                    OutlinedButton(
+                        onClick = { onVerAnuncio(itemId) },
+                        modifier = Modifier.fillMaxWidth().height(54.dp),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Text("Preencher manualmente", style = MaterialTheme.typography.titleMedium,
+                            color = CorTexto)
+                    }
                 }
-            } else {
-                CircularProgressIndicator(Modifier.size(28.dp), color = Destaque, strokeWidth = 3.dp)
+                terminado -> {
+                    Button(
+                        onClick = { onVerAnuncio(itemId) },
+                        modifier = Modifier.fillMaxWidth().height(54.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Destaque, contentColor = Color(0xFF04150F)
+                        )
+                    ) {
+                        Text("Ver anúncio", style = MaterialTheme.typography.titleMedium)
+                    }
+                }
+                else -> {
+                    CircularProgressIndicator(Modifier.size(28.dp), color = Destaque, strokeWidth = 3.dp)
+                }
             }
             Spacer(Modifier.height(12.dp))
             TextButton(onClick = onVoltar) { Text("Cancelar", color = CorTextoSec) }

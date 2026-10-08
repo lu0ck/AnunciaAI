@@ -25,19 +25,40 @@ data class SugestaoIA(
     val condicaoNormalizada: String
         get() = normalizarCondicao(condicao)
 
+    /**
+     * FASE 1 (spec v6): true quando a IA devolveu condição VAZIA ou irreconhecível
+     * e o app está usando o padrão "bom estado" — a UI mostra "condição estimada,
+     * confira". Nunca descarta a resposta por causa disso.
+     */
+    val condicaoEstimada: Boolean
+        get() {
+            if (condicao.isBlank()) return true
+            if (condicaoNormalizada != "bom estado") return false
+            // caiu em "bom estado" sem reconhecer nada → foi estimado
+            val c = semAcentos(condicao)
+            return "bom" !in c && c !in CONDICOES && c != "usado"
+        }
+
     companion object {
         val CONDICOES = listOf("novo", "como novo", "bom estado", "marcas de uso")
 
-        /** Converte qualquer variação da IA pra um dos 4 valores exatos. */
+        /** minúsculas + sem acentos (FASE 1: "Bom Estado"/"CONDIÇÃO" caem no contrato). */
+        private fun semAcentos(s: String) = java.text.Normalizer
+            .normalize(s.trim().lowercase(), java.text.Normalizer.Form.NFD)
+            .replace(Regex("\\p{Mn}+"), "")
+
+        /** Converte qualquer variação da IA pra um dos 4 valores exatos (FASE 1: sinônimos da spec). */
         fun normalizarCondicao(bruta: String): String {
-            val c = bruta.trim().lowercase()
+            val c = semAcentos(bruta)
             return when {
                 c.isEmpty() -> "bom estado"
-                "não identificado" in c -> "bom estado"
-                // "novo" exato, mas não "como novo" nem "seminovo"
+                "nao identificado" in c -> "bom estado"
+                "lacrado" in c || "nunca usado" in c || "nao usado" in c -> "novo"
+                // "novo" exato/derivados, mas não "como novo"/"seminovo"/"quase novo"
                 c == "novo" || c.startsWith("novo -") || c.startsWith("novo,") -> "novo"
-                "como novo" in c || "seminovo" in c -> "como novo"
+                "como novo" in c || "seminovo" in c || "quase novo" in c || "praticamente novo" in c -> "como novo"
                 "marcas" in c || "desgast" in c || "defeito" in c || "ruim" in c -> "marcas de uso"
+                c == "usado" -> "bom estado"
                 "bom" in c -> "bom estado"
                 else -> CONDICOES.firstOrNull { it == c } ?: "bom estado"
             }

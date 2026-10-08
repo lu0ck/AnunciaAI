@@ -218,11 +218,12 @@ class NvidiaVLService(
             - "preco_sugerido": preço ideal de VENDA para este item no mercado brasileiro (usado/recondicionado), considerando o estado visível nas fotos.
             - "preco_comparativo_mercado": preço médio praticado no mercado brasileiro para este produto em bom estado (novo ou seminovo, conforme o caso). Serve para o vendedor comparar.
 
-            REGRAS DA CONDIÇÃO — a chave "condicao" DEVE retornar EXCLUSIVAMENTE uma destas 4 strings, nada mais:
-            - "novo" (produto novo, sem sinais de uso)
+            REGRAS DA CONDIÇÃO — a chave "condicao" é OBRIGATÓRIA e NUNCA vazia; DEVE conter EXCLUSIVAMENTE uma destas 4 strings, nada mais:
+            - "novo" (produto novo, sem sinais de uso; também para imagem de catálogo/render oficial, sem foto real de uso)
             - "como novo" (usado, sem qualquer marca de uso aparente)
-            - "bom estado" (usado, com marcas leves de uso)
+            - "bom estado" (usado, com marcas leves de uso; SE NÃO DER PARA AVALIAR o estado pela foto, use "bom estado")
             - "marcas de uso" (usado, com desgaste/defeitos visíveis)
+            NUNCA retorne "condicao" vazia ou diferente dessas 4 strings.
 
             REGRAS ANTI-CONTRADIÇÃO (v11.1):
             - NUNCA descreva o mesmo produto com atributos tecnicamente contraditórios

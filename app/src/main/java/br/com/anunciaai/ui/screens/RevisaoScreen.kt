@@ -165,6 +165,7 @@ fun RevisaoScreen(
                                 app.repositorio.salvarItem(
                                     atual.copy(
                                         condicao = s.condicaoNormalizada,
+                                        condicaoEstimada = s.condicaoEstimada,
                                         precoComparativoMercado = s.precoComparativoMercado
                                     )
                                 )
@@ -361,6 +362,15 @@ fun RevisaoScreen(
                             )
                         }
                     }
+                }
+                // FASE 1 (v6): aviso discreto quando a condição foi estimada pela IA
+                if (item?.condicaoEstimada == true) {
+                    Spacer(Modifier.height(6.dp))
+                    Text(
+                        "Condição estimada — confira se está correta",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = CorTextoSec
+                    )
                 }
                 // preço comparativo do mercado (quando a IA devolve)
                 val comparativo = item?.precoComparativoMercado ?: 0.0

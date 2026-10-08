@@ -132,8 +132,9 @@ class QwenVLService(private val apiKey: String) : ServicoDeIA {
               "condicao": "novo"
             }
 
-            REGRAS DA CONDIÇÃO — a chave "condicao" DEVE retornar EXCLUSIVAMENTE uma destas 4 strings, nada mais:
+            REGRAS DA CONDIÇÃO — a chave "condicao" é OBRIGATÓRIA e NUNCA vazia; DEVE conter EXCLUSIVAMENTE uma destas 4 strings, nada mais:
             - "novo" | "como novo" | "bom estado" | "marcas de uso"
+            Imagem de catálogo/render oficial (sem foto real de uso) → "novo". Se não der para avaliar o estado → "bom estado".
 
             REGRAS ANTI-CONTRADIÇÃO:
             - NUNCA descreva o mesmo produto com atributos tecnicamente contraditórios

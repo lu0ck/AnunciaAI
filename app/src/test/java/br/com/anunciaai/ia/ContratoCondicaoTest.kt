@@ -3,14 +3,17 @@ package br.com.anunciaai.ia
 import br.com.anunciaai.ia.modelo.SugestaoIA
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * v11.1 — testes do contrato da condição (fixes #2/#3):
- * 1. valores exatos da IA passam íntegros até o chip (novo → "novo");
- * 2. resposta fora das 4 strings → re-tentativa devolve contrato válido;
- * 3. persistência falha graciosamente quando a IA insiste no erro.
+ * FASE 1 (spec v6) — contrato da resposta da IA:
+ * 1. valores exatos atravessam íntegros até o chip;
+ * 2. condição FORA das 4 (sinônimos, acentos, vazia) NÃO derruba a resposta —
+ *    é normalizada/estimada e o restante chega inteiro;
+ * 3. retry só quando falta o essencial (título/descrição/categoria/preço);
+ * 4. falha persistente = erro com botões "Tentar de novo"/"Preencher manualmente".
  */
 class ContratoCondicaoTest {
 
@@ -25,45 +28,94 @@ class ContratoCondicaoTest {
         }
     }
 
+    private val completa = SugestaoIA(
+        titulo = "Placa de vídeo RTX 3060",
+        descricao = "Placa em bom funcionamento.",
+        categoria_sugerida = "Eletrônicos > Hardware > Placas de vídeo",
+        precoSugerido = 1200.0,
+        condicao = "novo"
+    )
+
     @Test
     fun `condicao exata novo atravessa integro ate o chip`() {
-        // IA devolve "novo" → normalização preserva "novo" (chip certo marcado)
         val s = SugestaoIA(titulo = "Mouse Gamer Logitech G502", condicao = "novo")
         assertEquals("novo", s.condicaoNormalizada)
         assertTrue(s.condicaoNormalizada in SugestaoIA.CONDICOES)
+        assertFalse(s.condicaoEstimada)
     }
 
     @Test
-    fun `ia responde fora do contrato e o retry devolve valor valido`() = runBlocking {
+    fun `condicao vazia nao derruba a resposta — vira bom estado estimado`() = runBlocking {
+        // caso real da placa de vídeo: IA devolve condicao ""
+        val r = IAfake(listOf(completa.copy(condicao = ""))).gerarComContrato(listOf(ByteArray(8)))
+        assertTrue(r.isSuccess)
+        val s = r.getOrNull()!!
+        assertEquals("bom estado", s.condicaoNormalizada)
+        assertTrue(s.condicaoEstimada)
+        assertEquals("Placa de vídeo RTX 3060", s.titulo) // resto intacto
+    }
+
+    @Test
+    fun `sinonimos e acentos normalizam pro contrato`() {
+        listOf(
+            "usado - como novo" to "como novo",
+            "seminovo" to "como novo",
+            "quase novo" to "como novo",
+            "Bom Estado" to "bom estado",
+            "usado" to "bom estado",
+            "usado - bom estado" to "bom estado",
+            "com marcas de uso" to "marcas de uso",
+            "desgaste" to "marcas de uso",
+            "lacrado" to "novo",
+            "nunca usado" to "novo",
+            "marcas de uso" to "marcas de uso"
+        ).forEach { (bruta, esperada) ->
+            assertEquals(esperada, SugestaoIA.normalizarCondicao(bruta))
+        }
+    }
+
+    @Test
+    fun `condicao estranha completa a resposta sem retry`() = runBlocking {
+        // condição irreconhecível + resto completo → aceita, 1 chamada só
+        val ia = IAfake(listOf(completa.copy(condicao = "regularzinho")))
+        val r = ia.gerarComContrato(listOf(ByteArray(8)))
+        assertTrue(r.isSuccess)
+        assertEquals("bom estado", r.getOrNull()!!.condicaoNormalizada) // estimado
+        assertTrue(r.getOrNull()!!.condicaoEstimada)
+        assertEquals("sem retry (resposta aproveitada)", 1, ia.chamadas)
+    }
+
+    @Test
+    fun `retry quando falta o essencial e a segunda vem boa`() = runBlocking {
+        // 1ª: sem preço (essencial faltando) → retry; 2ª: completa
         val ia = IAfake(
             listOf(
-                SugestaoIA(titulo = "Mouse sem fio", condicao = "praticamente novo"), // inválida
-                SugestaoIA(titulo = "Mouse sem fio", condicao = "como novo")          // válida
+                completa.copy(precoSugerido = 0.0),
+                completa
             )
         )
         val r = ia.gerarComContrato(listOf(ByteArray(8)))
         assertTrue(r.isSuccess)
-        assertEquals("como novo", r.getOrNull()!!.condicaoNormalizada)
         assertEquals("retry aconteceu (2 chamadas)", 2, ia.chamadas)
+        assertEquals("novo", r.getOrNull()!!.condicaoNormalizada)
     }
 
     @Test
-    fun `ia insiste no erro e o contrato falha com mensagem clara`() = runBlocking {
-        val ia = IAfake(listOf(SugestaoIA(titulo = "Item", condicao = "regularzinho")))
+    fun `ia insiste sem o essencial e o contrato falha com mensagem clara`() = runBlocking {
+        // sem título/preço → inutilizável nas 2 tentativas → erro
+        val ia = IAfake(listOf(completa.copy(titulo = "", precoSugerido = 0.0)))
         val r = ia.gerarComContrato(listOf(ByteArray(8)))
         assertTrue(r.isFailure)
-        assertTrue(r.exceptionOrNull()!!.message!!.contains("fora do contrato"))
+        assertTrue(r.exceptionOrNull()!!.message!!.contains("essencial"))
+        assertEquals("2 tentativas esgotadas", 2, ia.chamadas)
     }
 
     @Test
-    fun `normalizador tolera variacoes legadas sem quebrar o contrato`() {
-        // respostas antigas/variadas da IA ainda caem num dos 4 valores
+    fun `normalizador legado continua valido`() {
         listOf(
             "novo" to "novo",
             "como novo" to "como novo",
             "seminovo" to "como novo",
-            "usado - bom estado" to "bom estado",
-            "com marcas de uso" to "marcas de uso",
             "" to "bom estado"
         ).forEach { (bruta, esperada) ->
             assertEquals(esperada, SugestaoIA.normalizarCondicao(bruta))

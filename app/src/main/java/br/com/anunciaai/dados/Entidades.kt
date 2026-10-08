@@ -17,6 +17,9 @@ data class Item(
     // v11.1 (fix #2): a condição da IA agora PERSISTE — antes era descartada na
     // Análise e a Revisão reconstruía a SugestaoIA sem ela (chip caía em "bom estado").
     val condicao: String = "",
+    // FASE 1 (spec v6): a IA devolveu condição vazia/irreconhecível e o app
+    // aplicou o padrão "bom estado" — a Revisão avisa "condição estimada".
+    val condicaoEstimada: Boolean = false,
     // v11.1 (fix #6): EAN lido pelo scanner persiste no item (robustez do fluxo)
     val ean: String? = null,
     val dataCriacao: Long = System.currentTimeMillis()
