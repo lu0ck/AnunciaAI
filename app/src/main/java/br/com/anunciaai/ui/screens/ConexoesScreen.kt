@@ -15,6 +15,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.KeyOff
@@ -60,7 +61,7 @@ import kotlinx.coroutines.launch
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ConexoesScreen(embutida: Boolean = false) {
+fun ConexoesScreen(embutida: Boolean = false, onVoltar: () -> Unit = {}) {
     val contexto = LocalContext.current
     val app = contexto.applicationContext as AnunciaAIApp
     val escopo = rememberCoroutineScope()
@@ -250,7 +251,13 @@ fun ConexoesScreen(embutida: Boolean = false) {
             containerColor = br.com.anunciaai.ui.theme.CorFundo,
             topBar = {
                 TopAppBar(
-                    title = { Text("Conexões", style = MaterialTheme.typography.headlineSmall, color = CorTexto) }
+                    title = { Text("Conexões", style = MaterialTheme.typography.headlineSmall, color = CorTexto) },
+                    // fix: seta de voltar — mesmo padrão de Revisão/Status/Detalhe
+                    navigationIcon = {
+                        IconButton(onClick = onVoltar) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Voltar", tint = CorTexto)
+                        }
+                    }
                 )
             }
         ) { pad ->

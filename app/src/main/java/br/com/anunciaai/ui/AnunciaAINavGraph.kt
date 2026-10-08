@@ -108,7 +108,7 @@ fun AnunciaAINavGraph() {
                 PerfilScreen(onVoltar = { nav.popBackStack() })
             }
             composable(Rotas.CONEXOES) {
-                ConexoesScreen(embutida = false)
+                ConexoesScreen(embutida = false, onVoltar = { nav.popBackStack() })
             }
             composable(Rotas.CONFIG) {
                 ConfigScreen(
